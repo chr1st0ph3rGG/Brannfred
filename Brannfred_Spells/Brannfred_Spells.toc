@@ -1,5 +1,5 @@
 ## Interface: 20505
-## Version: 1.0.0
+## Version: 1.1.0
 ## Title: Brannfred – Spells
 ## Notes: Spell provider for Brannfred
 ## Author: chr1st0ph3rGG
