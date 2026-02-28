@@ -1,0 +1,27 @@
+## Interface: 20505
+## Version: 1.0.0
+## Title: Brannfred - Core
+## Notes: A keyboard-driven search bar for WoW
+## Author: chr1st0ph3rGG
+## SavedVariables: BrannfredDB
+## OptionalDeps: Ace3, Masque
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceLocale-3.0\AceLocale-3.0.xml
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+Libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
+Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\LibDBIcon-1.0\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0\lib.xml
+
+Bindings.xml
+Locales\enUS.lua
+Locales\deDE.lua
+Core.lua
+Search.lua
+SearchFrame.lua
+Keybinds.lua

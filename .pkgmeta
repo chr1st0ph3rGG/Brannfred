@@ -1,0 +1,17 @@
+package-as: Brannfred
+enable-nolib-creation: no
+
+ignore:
+  - scripts
+  - media
+
+required-dependencies:
+
+
+optional-dependencies:
+  - 914482-baganator
+  - 18808-tomtom
+  - 334372-questie
+  - 988370-syndicator
+  - 1441253-itemrack-anniversary
+

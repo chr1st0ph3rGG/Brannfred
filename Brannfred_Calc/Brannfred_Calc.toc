@@ -1,0 +1,10 @@
+## Interface: 20505
+## Version: 1.0.0
+## Title: Brannfred_Calc
+## Notes: Calculator provider for Brannfred
+## Author: chr1st0ph3rGG
+## Dependencies: Brannfred
+
+Locales\enUS.lua
+Locales\deDE.lua
+Calc.lua

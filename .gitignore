@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editor
+.vscode/settings.json
+*.swp
+*~
+
+# WoW / Packaging
+*.zip
+.release/
+.pkgmeta-dev
+
+# Lua tooling
+luac.out
+.luarc.json
+
+# Wago/CurseForge CI secrets
+.env

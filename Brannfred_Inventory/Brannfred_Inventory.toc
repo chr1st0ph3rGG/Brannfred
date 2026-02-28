@@ -1,0 +1,11 @@
+## Interface: 20505
+## Version: 1.0.0
+## Title: Brannfred – Inventory
+## Notes: Bag and bank search via Syndicator
+## Author: chr1st0ph3rGG
+## Dependencies: Brannfred, Syndicator
+## OptionalDeps: Baganator
+
+Locales\enUS.lua
+Locales\deDE.lua
+Inventory.lua

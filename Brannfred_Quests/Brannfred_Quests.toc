@@ -1,0 +1,11 @@
+## Interface: 20505
+## Version: 1.0.0
+## Title: Brannfred – Quests
+## Notes: Quest provider for Brannfred
+## Author: chr1st0ph3rGG
+## Dependencies: Brannfred, Questie
+## OptionalDeps: TomTom
+
+Locales\enUS.lua
+Locales\deDE.lua
+Quests.lua

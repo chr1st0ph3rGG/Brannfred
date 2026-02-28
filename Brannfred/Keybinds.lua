@@ -1,0 +1,5 @@
+local BrannfredToggleButton = CreateFrame("Button", "BrannfredToggleButton", UIParent)
+BrannfredToggleButton:RegisterForClicks("AnyUp")
+BrannfredToggleButton:SetScript("OnClick", function()
+    Brannfred:OnToggleFrame()
+end)
