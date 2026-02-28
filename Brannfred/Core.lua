@@ -22,18 +22,21 @@ function Brannfred.AddToHistory(entry)
     end
 
     table.insert(Brannfred.history, 1, {
-        name           = original.name,
-        icon           = original.icon,
-        type           = "history",
-        color          = original.color,
-        labelColor     = original.labelColor,
-        getMeta        = original.getMeta,
-        getStats       = original.getStats,
-        getDesc        = original.getDesc,
-        onActivate     = original.onActivate,
-        onDrag         = original.onDrag,
-        _originalType  = original.type,
-        _originalEntry = original,
+        name              = original.name,
+        icon              = original.icon,
+        type              = "history",
+        color             = original.color,
+        labelColor        = original.labelColor,
+        getMeta           = original.getMeta,
+        getStats          = original.getStats,
+        getDesc           = original.getDesc,
+        onActivate        = original.onActivate,
+        onShiftActivate   = original.onShiftActivate,
+        onCtrlActivate    = original.onCtrlActivate,
+        onAltActivate     = original.onAltActivate,
+        onDrag            = original.onDrag,
+        _originalType     = original.type,
+        _originalEntry    = original,
     })
 
     while #Brannfred.history > HISTORY_MAX do

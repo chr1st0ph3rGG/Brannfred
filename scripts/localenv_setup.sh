@@ -8,3 +8,4 @@ ln -s -f "$PWD/Brannfred_Menus" "/Applications/World of Warcraft/_anniversary_/I
 ln -s -f "$PWD/Brannfred_Quests" "/Applications/World of Warcraft/_anniversary_/Interface/AddOns/Brannfred_Quests"
 ln -s -f "$PWD/Brannfred_Spells" "/Applications/World of Warcraft/_anniversary_/Interface/AddOns/Brannfred_Spells"
 ln -s -f "$PWD/Brannfred_EquipSets" "/Applications/World of Warcraft/_anniversary_/Interface/AddOns/Brannfred_EquipSets"
+ln -s -f "$PWD/Brannfred_Friends" "/Applications/World of Warcraft/_anniversary_/Interface/AddOns/Brannfred_Friends"

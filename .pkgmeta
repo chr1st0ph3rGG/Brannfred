@@ -5,9 +5,6 @@ ignore:
   - scripts
   - media
 
-required-dependencies:
-
-
 optional-dependencies:
   - 914482-baganator
   - 18808-tomtom

@@ -11,6 +11,14 @@ Use a bang prefix (e.g. `!s` or `!spell`) to narrow results to a specific source
 
 The Brannfred Frame is completely customizable; you can change border, colors, and font in the Brannfred Settings. Additionally, all icons can be styled with Masque.
 
+## Opening Brannfred
+
+There are three ways to open the search bar:
+
+- **Keybind** — Go to \_Game Menu → Key Bindings → Other and bind a key to **"Toggle Brannfred search"**. This is the recommended way. Default is `Ctrl-+`.
+- **Slash commands** — Type `/brannfred` or `/bfrd` in chat to toggle the frame.
+- **Minimap icon** — Left-click the Brannfred minimap button.
+
 ## Modules
 
 Brannfred comes with a bunch of powerful modules from the get-go
@@ -73,6 +81,22 @@ You can do quite a bit of calculation with it… I needed a use case for a dynam
 | `exp(x)`                | e^x                    |
 | `min(a,b,…)/max(a,b,…)` | Minimum / Maximum      |
 
+### Friends
+
+**Prefix:** `!f` — shows both Battle.net and in-game friends together.
+Use `!bnet` / `!bn` to show only Battle.net friends, or `!friend` / `!fr` for in-game friends only.
+
+Lists all your friends sorted by priority: in-game online friends appear first, followed by Battle.net online friends (e.g. playing another game), and offline friends always at the bottom. Online friends are shown in green, offline in grey.
+
+- **`Enter`** — pre-fills the chat box with `/w <name>` so you can start typing immediately.
+- **`Shift-Enter`** — invites the friend to your party (only works when they are actively in-game).
+
+**Battle.net friends:** when the friend is playing WoW, their character name is shown with the BattleTag appended in blue parentheses (e.g. `Friedbert (John#1234)`). When online but not in WoW, only the BattleTag or Real ID name is shown. The meta column shows AFK, DND, Online, or Offline status.
+
+**In-game friends:** the meta column shows their level when online, or `Offline` otherwise.
+
+The detail panel shows class, current zone, and any friend note you have set.
+
 ### Equipment Sets
 
 **Prefix:** `!eq`, `!equip`, `!set`, or `!gear`
@@ -123,29 +147,30 @@ Brannfred:RegisterProvider(MyProvider)
 | `labelColor`     | —        | Default `{r,g,b}` for the type label column.                                   |
 | `entries`        | —        | Flat list of entry tables. Populated in `OnEnable` or `onQuery`.               |
 | `OnEnable()`     | —        | Called when Brannfred enables. Build `self.entries` here.                      |
-| `prefixOnly`     | —        | `true` → excluded from global (unprefixed) search.                             |
-| `preserveOrder`  | —        | `true` → entries are not alphabetically sorted (combine with `prefixOnly`).    |
-| `onQuery(query)` | —        | Called per keystroke for dynamic providers; build `self.entries` inside it.    |
+| `prefixOnly`           | —        | `true` → excluded from global (unprefixed) search.                                              |
+| `preserveOrder`        | —        | `true` → Search does not re-sort entries; the provider is responsible for ordering them itself. |
+| `hideFromAutocomplete` | —        | `true` → provider is hidden from the `!` autocomplete list but still reachable via its aliases. |
+| `onQuery(query)`       | —        | Called per keystroke for dynamic providers; build `self.entries` inside it.                     |
 
 ### Entry fields
 
-| Field               | Required | Description                                                                 |
-| ------------------- | -------- | --------------------------------------------------------------------------- |
-| `name`              | yes      | Display name and default fuzzy-match target.                                |
-| `icon`              | yes      | Texture path or FileDataID.                                                 |
-| `type`              | yes      | Must equal `provider.type`.                                                 |
-| `color`             | —        | `{r,g,b}` override for the entry name text.                                 |
-| `labelColor`        | —        | `{r,g,b}` override for the type label.                                      |
-| `searchName`        | —        | Alternative string used for fuzzy matching (e.g. `"Fireball Rank 5"`).      |
-| `getMeta()`         | —        | Returns a short string for the meta column (color escape codes supported).  |
-| `getStats()`        | —        | Returns a one-line stat string shown in the description panel header.       |
-| `getDesc()`         | —        | Returns a longer description shown below the separator line.                |
-| `onActivate()`      | —        | Called on `Enter` or left-click.                                            |
-| `onDrag()`          | —        | Called when the row is dragged (e.g. `PickupSpellBookItem`).                |
-| `onShiftActivate()` | —        | Called on `Shift-Enter`.                                                    |
-| `onCtrlActivate()`  | —        | Called on `Ctrl-Enter`.                                                     |
-| `onAltActivate()`   | —        | Called on `Alt-Enter`.                                                      |
-| `_noPreview`        | —        | `true` → suppresses the description panel for this entry.                   |
+| Field               | Required | Description                                                                |
+| ------------------- | -------- | -------------------------------------------------------------------------- |
+| `name`              | yes      | Display name and default fuzzy-match target.                               |
+| `icon`              | yes      | Texture path or FileDataID.                                                |
+| `type`              | yes      | Must equal `provider.type`.                                                |
+| `color`             | —        | `{r,g,b}` override for the entry name text.                                |
+| `labelColor`        | —        | `{r,g,b}` override for the type label.                                     |
+| `searchName`        | —        | Alternative string used for fuzzy matching (e.g. `"Fireball Rank 5"`).     |
+| `getMeta()`         | —        | Returns a short string for the meta column (color escape codes supported). |
+| `getStats()`        | —        | Returns a one-line stat string shown in the description panel header.      |
+| `getDesc()`         | —        | Returns a longer description shown below the separator line.               |
+| `onActivate()`      | —        | Called on `Enter` or left-click.                                           |
+| `onDrag()`          | —        | Called when the row is dragged (e.g. `PickupSpellBookItem`).               |
+| `onShiftActivate()` | —        | Called on `Shift-Enter`.                                                   |
+| `onCtrlActivate()`  | —        | Called on `Ctrl-Enter`.                                                    |
+| `onAltActivate()`   | —        | Called on `Alt-Enter`.                                                     |
+| `_noPreview`        | —        | `true` → suppresses the description panel for this entry.                  |
 
 ### Dynamic providers
 

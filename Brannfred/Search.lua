@@ -25,26 +25,34 @@ local function fuzzyScore(str, pattern)
 end
 
 -- ── Prefix parsing ────────────────────────────────────────────────────────────
--- "!spell fireball" → typeFilter="spell", query="fireball"
--- "!menu"           → typeFilter="menu",  query=""
--- "fireball"        → typeFilter=nil,     query="fireball"
+-- "!spell fireball" → typeFilter={spell=true}, query="fireball"
+-- "!f"              → typeFilter={friend=true,bnet=true}, query=""  (shared alias)
+-- "fireball"        → typeFilter=nil,           query="fireball"
 -- Aliases ("!s", "!m", …) are declared by each provider via provider.aliases.
-local function resolveTypePrefix(prefix)
+-- Returns a set { [type]=true } so a single alias can match multiple providers.
+local function resolveTypePrefixes(prefix)
+    local matched = {}
     for _, provider in ipairs(Brannfred.providers) do
-        if provider.type == prefix then return prefix end
-        if provider.aliases then
+        if provider.type == prefix then
+            matched[provider.type] = true
+        elseif provider.aliases then
             for _, alias in ipairs(provider.aliases) do
-                if alias == prefix then return provider.type end
+                if alias == prefix then
+                    matched[provider.type] = true
+                    break
+                end
             end
         end
     end
-    return prefix -- unknown → no results (no entry.type will match)
+    -- Fall back to a set with the raw prefix so unknown aliases produce no results
+    -- (no entry.type will equal an unregistered string).
+    return next(matched) and matched or { [prefix] = true }
 end
 
 local function parseQuery(raw)
     local prefix, rest = raw:match("^!(%a+)%s*(.*)")
     if prefix then
-        return resolveTypePrefix(prefix:lower()), rest
+        return resolveTypePrefixes(prefix:lower()), rest
     end
     return nil, raw
 end
@@ -89,7 +97,7 @@ function Brannfred.Search(query, maxResults)
                         shortAlias = (provider.aliases and provider.aliases[1]) or provider.type
                     end
                 end
-                if shortAlias then
+                if shortAlias and not provider.hideFromAutocomplete then
                     local icon = provider.providerIcon
                         or (provider.entries and provider.entries[1] and provider.entries[1].icon)
                         or "134400"
@@ -133,17 +141,17 @@ function Brannfred.Search(query, maxResults)
         local hiddenGlobally = not typeFilter
             and (provider.prefixOnly or disabledProviders[provider.type])
         if not hiddenGlobally then
-            if typeFilter and provider.prefixOnly and provider.preserveOrder then
+            if typeFilter and typeFilter[provider.type] and provider.preserveOrder then
                 preserveOrder = true
             end
             -- Dynamic providers (e.g. calculator) build their own entries per query;
             -- skip fuzzy scoring for them – they already decided what to show.
-            local isDynamic = typeFilter and provider.type == typeFilter and provider.onQuery
+            local isDynamic = typeFilter and typeFilter[provider.type] and provider.onQuery
             if isDynamic then
                 provider:onQuery(actualQuery)
             end
             for _, entry in ipairs(provider.entries or {}) do
-                if not typeFilter or entry.type == typeFilter then
+                if not typeFilter or typeFilter[entry.type] then
                     if actualQuery == "" or isDynamic then
                         scored[#scored + 1] = { entry = entry, score = 0 }
                     else
