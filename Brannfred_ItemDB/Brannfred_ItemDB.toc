@@ -1,0 +1,11 @@
+## Interface: 20505
+## Version: @project-version@
+## Title: Brannfred – Item DB
+## Notes: Search the item database for items you don't own (!idb, !itemdb)
+## Author: chr1st0ph3rGG
+## Dependencies: Brannfred
+## OptionalDeps: Ludwig
+
+Locales\enUS.lua
+Locales\deDE.lua
+ItemDB.lua
