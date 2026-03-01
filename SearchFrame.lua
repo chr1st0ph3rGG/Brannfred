@@ -1,11 +1,11 @@
-local L   = LibStub("AceLocale-3.0"):GetLocale("Brannfred")
-local MSQ = LibStub("Masque", true)
+local L               = LibStub("AceLocale-3.0"):GetLocale("Brannfred")
+local MSQ             = LibStub("Masque", true)
 
 Brannfred.searchFrame = CreateFrame("Frame", "BrannfredSearchFrame", UIParent, "BackdropTemplate")
 
-local main_font = "fonts/frizqt__.ttf"
+local main_font       = "fonts/frizqt__.ttf"
 
-local frame = Brannfred.searchFrame
+local frame           = Brannfred.searchFrame
 frame:SetSize(420, 46)
 frame:SetPoint("TOP", UIParent, "TOP", 0, -280)
 frame:SetFrameStrata("HIGH")
@@ -19,7 +19,7 @@ frame:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
 -- Background as a separate BACKGROUND-layer texture so it never covers the border
 local frameBg = frame:CreateTexture(nil, "BACKGROUND")
 frameBg:SetColorTexture(0.07, 0.07, 0.07, 0.93)
-frameBg:SetPoint("TOPLEFT",     frame, "TOPLEFT",     1, -1)
+frameBg:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
 frameBg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -1, 1)
 frame:Hide()
 
@@ -34,10 +34,10 @@ editBox:SetFont(main_font, 15, "")
 editBox:SetTextColor(0.95, 0.95, 0.95, 1)
 
 -- Constants
-local MAX_RESULTS    = 50
-local VISIBLE_ROWS   = 10  -- may be updated by ApplyFrameSettings
-local CONTENT_PAD    = 1   -- may be updated by ApplyFrameSettings
-local ROW_HEIGHT     = 32
+local MAX_RESULTS  = 50
+local VISIBLE_ROWS = 10   -- may be updated by ApplyFrameSettings
+local CONTENT_PAD  = 1    -- may be updated by ApplyFrameSettings
+local ROW_HEIGHT   = 32
 
 -- Type label lookup: reads the label field each provider declares
 local function getTypeLabel(entryType)
@@ -58,7 +58,7 @@ local masqueGroup    = nil
 local selectRow, showDescription, updateScrollBar
 
 -- Shared backdrop helper — border only, background handled by a separate texture
-local BACKDROP = { edgeFile = "Interface/Buttons/WHITE8X8", edgeSize = 1 }
+local BACKDROP       = { edgeFile = "Interface/Buttons/WHITE8X8", edgeSize = 1 }
 local function applyBackdrop(f)
     f:SetBackdrop(BACKDROP)
     f:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
@@ -72,7 +72,7 @@ resultsFrame:SetFrameStrata("HIGH")
 applyBackdrop(resultsFrame)
 local resultsBg = resultsFrame:CreateTexture(nil, "BACKGROUND")
 resultsBg:SetColorTexture(0.07, 0.07, 0.07, 0.93)
-resultsBg:SetPoint("TOPLEFT",     resultsFrame, "TOPLEFT",     1, -1)
+resultsBg:SetPoint("TOPLEFT", resultsFrame, "TOPLEFT", 1, -1)
 resultsBg:SetPoint("BOTTOMRIGHT", resultsFrame, "BOTTOMRIGHT", -1, 1)
 resultsFrame:Hide()
 
@@ -131,7 +131,7 @@ descFrame:SetFrameStrata("HIGH")
 applyBackdrop(descFrame)
 local descBg = descFrame:CreateTexture(nil, "BACKGROUND")
 descBg:SetColorTexture(0.07, 0.07, 0.07, 0.93)
-descBg:SetPoint("TOPLEFT",     descFrame, "TOPLEFT",     1, -1)
+descBg:SetPoint("TOPLEFT", descFrame, "TOPLEFT", 1, -1)
 descBg:SetPoint("BOTTOMRIGHT", descFrame, "BOTTOMRIGHT", -1, 1)
 descFrame:Hide()
 
@@ -180,7 +180,7 @@ local descText = descFrame:CreateFontString(nil, "OVERLAY")
 descText:SetFont(main_font, 12, "")
 descText:SetTextColor(0.85, 0.85, 0.85, 1)
 descText:SetPoint("TOPLEFT", descFrame, "TOPLEFT", 8, -72)
-descText:SetWidth(404)
+descText:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -8, -72)
 descText:SetJustifyH("LEFT")
 descText:SetJustifyV("TOP")
 descText:SetWordWrap(true)
@@ -272,7 +272,8 @@ for i = 1, MAX_RESULTS do
                 return
             end
             if IsControlKeyDown() and self.entry.onCtrlActivate then
-                local keepOpen = type(self.entry.ctrlKeepsOpen) == "function" and self.entry.ctrlKeepsOpen() or self.entry.ctrlKeepsOpen
+                local keepOpen = type(self.entry.ctrlKeepsOpen) == "function" and self.entry.ctrlKeepsOpen() or
+                self.entry.ctrlKeepsOpen
                 if not keepOpen then frame:Hide() end
                 self.entry.onCtrlActivate()
                 return
@@ -328,7 +329,7 @@ showDescription = function(entry)
     if desc ~= "" then
         descText:SetText(desc)
         local descH = descText:GetStringHeight()
-        descFrame:SetHeight(CONTENT_PAD * 2 + 68 + descH)
+        descFrame:SetHeight(CONTENT_PAD * 2 + 68 + descH + 8)
         sep:Show()
         descText:Show()
     else
@@ -439,7 +440,8 @@ editBox:SetScript("OnKeyDown", function(self, key)
                 return
             end
             if IsControlKeyDown() and selected.entry.onCtrlActivate then
-                local keepOpen = type(selected.entry.ctrlKeepsOpen) == "function" and selected.entry.ctrlKeepsOpen() or selected.entry.ctrlKeepsOpen
+                local keepOpen = type(selected.entry.ctrlKeepsOpen) == "function" and selected.entry.ctrlKeepsOpen() or
+                selected.entry.ctrlKeepsOpen
                 if not keepOpen then frame:Hide() end
                 selected.entry.onCtrlActivate()
                 self:SetPropagateKeyboardInput(false)
@@ -505,16 +507,16 @@ end)
 -- opaque border pixels.  Used to position the bg texture so it meets the visible
 -- inner edge of the border (and not the transparent inner area of the 9-slice).
 local TEXTURE_INSET_RATIO = {
-    ["Interface/Buttons/WHITE8X8"]                        = 1.0,   -- solid: full edgeSize
-    ["Interface/Tooltips/UI-Tooltip-Border"]              = 5/16,  -- native inset=5, size=16
-    ["Interface/DialogFrame/UI-DialogBox-Border"]         = 11/32, -- native inset=11, size=32
-    ["Interface/DialogFrame/UI-DialogBox-Gold-Border"]    = 11/32,
-    ["Interface/FriendsFrame/UI-Toast-Border"]            = 4/12,  -- native inset=4, size=12
+    ["Interface/Buttons/WHITE8X8"]                     = 1.0,      -- solid: full edgeSize
+    ["Interface/Tooltips/UI-Tooltip-Border"]           = 5 / 16,   -- native inset=5, size=16
+    ["Interface/DialogFrame/UI-DialogBox-Border"]      = 11 / 32,  -- native inset=11, size=32
+    ["Interface/DialogFrame/UI-DialogBox-Gold-Border"] = 11 / 32,
+    ["Interface/FriendsFrame/UI-Toast-Border"]         = 4 / 12,   -- native inset=4, size=12
 }
 
 local function bgInset(btex, bs)
     if bs == 0 or btex == "none" then return 0 end
-    local r = TEXTURE_INSET_RATIO[btex] or (1/3)
+    local r = TEXTURE_INSET_RATIO[btex] or (1 / 3)
     return (r == 1.0) and bs or math.max(1, math.ceil(bs * r))
 end
 
@@ -524,9 +526,9 @@ end
 function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-set-field
     if not Brannfred.db then return end
     local p     = Brannfred.db.profile or {}
-    local w     = p.frameWidth  or 420
-    local fpath = p.fontPath    or "fonts/frizqt__.ttf"
-    local fsize = p.fontSize    or 13
+    local w     = p.frameWidth or 420
+    local fpath = p.fontPath or "fonts/frizqt__.ttf"
+    local fsize = p.fontSize or 13
 
     -- Width (results/desc follow the main frame width)
     frame:SetWidth(w)
@@ -547,25 +549,25 @@ function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-s
     descText:SetFont(fpath, math.max(6, fsize - 1), "")
 
     -- Visible rows + content padding
-    VISIBLE_ROWS = p.visibleRows    or 10
-    CONTENT_PAD  = p.contentPadding or (p.borderSize or 1)
-    local cp = CONTENT_PAD
+    VISIBLE_ROWS             = p.visibleRows or 10
+    CONTENT_PAD              = p.contentPadding or (p.borderSize or 1)
+    local cp                 = CONTENT_PAD
 
     -- Border
-    local bs   = p.borderSize    or 1
-    local btex = p.borderTexture or "Interface/Buttons/WHITE8X8"
-    local edgeFile = (btex == "none" or bs == 0) and "" or btex
-    local bd       = { edgeFile = edgeFile, edgeSize = bs }
+    local bs                 = p.borderSize or 1
+    local btex               = p.borderTexture or "Interface/Buttons/WHITE8X8"
+    local edgeFile           = (btex == "none" or bs == 0) and "" or btex
+    local bd                 = { edgeFile = edgeFile, edgeSize = bs }
 
-    local bgr, bgg, bgb, bga = p.bgR    or 0.07, p.bgG    or 0.07, p.bgB    or 0.07, p.bgA    or 0.93
+    local bgr, bgg, bgb, bga = p.bgR or 0.07, p.bgG or 0.07, p.bgB or 0.07, p.bgA or 0.93
     local bdr, bdg, bdb, bda = p.borderR or 0.25, p.borderG or 0.25, p.borderB or 0.25, p.borderA or 1.0
 
     -- Background textures: inset by the VISUAL border width (not full edgeSize)
     -- so the bg meets the visible inner edge of the border without a gap.
-    local bgi = bgInset(btex, bs)
+    local bgi                = bgInset(btex, bs)
     for _, bg in ipairs({ frameBg, resultsBg, descBg }) do
         bg:ClearAllPoints()
-        bg:SetPoint("TOPLEFT",     bg:GetParent(), "TOPLEFT",     bgi, -bgi)
+        bg:SetPoint("TOPLEFT", bg:GetParent(), "TOPLEFT", bgi, -bgi)
         bg:SetPoint("BOTTOMRIGHT", bg:GetParent(), "BOTTOMRIGHT", -bgi, bgi)
         bg:SetColorTexture(bgr, bgg, bgb, bga)
     end
@@ -577,36 +579,37 @@ function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-s
 
     -- scrollFrame + scrollbar: inset by content padding
     scrollFrame:ClearAllPoints()
-    scrollFrame:SetPoint("TOPLEFT",     resultsFrame, "TOPLEFT",     cp,      -cp)
-    scrollFrame:SetPoint("BOTTOMRIGHT", resultsFrame, "BOTTOMRIGHT", -(cp+4),  cp)
+    scrollFrame:SetPoint("TOPLEFT", resultsFrame, "TOPLEFT", cp, -cp)
+    scrollFrame:SetPoint("BOTTOMRIGHT", resultsFrame, "BOTTOMRIGHT", -(cp + 4), cp)
     scrollChild:SetWidth(w - cp * 2 - 4)
 
     sbTrack:ClearAllPoints()
-    sbTrack:SetPoint("TOPRIGHT",    resultsFrame, "TOPRIGHT",    -cp,  -cp)
-    sbTrack:SetPoint("BOTTOMRIGHT", resultsFrame, "BOTTOMRIGHT", -cp,   cp)
+    sbTrack:SetPoint("TOPRIGHT", resultsFrame, "TOPRIGHT", -cp, -cp)
+    sbTrack:SetPoint("BOTTOMRIGHT", resultsFrame, "BOTTOMRIGHT", -cp, cp)
 
     -- Description panel elements: reanchor to content padding
     -- Icon gets 6 px of extra inset on all sides for visual breathing room.
-    local ii = 6  -- icon inset
+    local ii = 6 -- icon inset
     descIconBtn:ClearAllPoints()
     descIconBtn:SetPoint("TOPLEFT", descFrame, "TOPLEFT", cp + ii, -(cp + ii))
 
     descName:ClearAllPoints()
-    descName:SetPoint("TOPLEFT",  descFrame, "TOPLEFT",  cp + ii + 48 + 8, -(cp + ii))
-    descName:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -cp,               -(cp + ii))
+    descName:SetPoint("TOPLEFT", descFrame, "TOPLEFT", cp + ii + 48 + 8, -(cp + ii))
+    descName:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -cp, -(cp + ii))
 
     descStats:ClearAllPoints()
-    descStats:SetPoint("TOPLEFT",  descFrame, "TOPLEFT",  cp + ii + 48 + 8, -(cp + ii + 18))
-    descStats:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -cp,               -(cp + ii + 18))
+    descStats:SetPoint("TOPLEFT", descFrame, "TOPLEFT", cp + ii + 48 + 8, -(cp + ii + 18))
+    descStats:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -cp, -(cp + ii + 18))
     descStats:SetWidth(w - cp * 2 - ii - 48 - 8)
 
     sep:ClearAllPoints()
-    sep:SetPoint("TOPLEFT",  descFrame, "TOPLEFT",  cp,  -(cp + ii + 48 + ii))
+    sep:SetPoint("TOPLEFT", descFrame, "TOPLEFT", cp, -(cp + ii + 48 + ii))
     sep:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -cp, -(cp + ii + 48 + ii))
 
     descText:ClearAllPoints()
-    descText:SetPoint("TOPLEFT", descFrame, "TOPLEFT", cp, -(cp + ii + 48 + ii + 8))
-    descText:SetWidth(w - cp * 2)
+    descText:SetPoint("TOPLEFT",  descFrame, "TOPLEFT",  cp + ii, -(cp + ii + 48 + ii + 8))
+    descText:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -(cp + ii), -(cp + ii + 48 + ii + 8))
+    descText:SetWidth(w - (cp + ii) * 2)
 
     -- Masque icon skins (optional)
     if MSQ and p.useMasque then

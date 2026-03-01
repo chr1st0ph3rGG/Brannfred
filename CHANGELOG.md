@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.3
+
+### Bugfix
+
+- Fix ugly looking description text
+
+## 1.2.2
+
+### Bugfix
+
+- Fix .pkgmeta to correctly move providers
+
+## 1.2.1
+
+### Changes
+
+- Rearrange code stucture so it may work with packager
+
 ## 1.2.0
 
 ### New Features
