@@ -41,7 +41,7 @@ end
 -- ── Battle.net Friends Provider ───────────────────────────────────────────────
 local BNetFriendsProvider   = {
     type          = "bnet",
-    label         = L["Friends"],
+    label         = L["Battle.net"],
     aliases       = { "f", "bn", "bnet" },
     preserveOrder = true,
     providerIcon  = "Interface/ICONS/INV_Misc_GroupLooking",
@@ -53,7 +53,7 @@ local BNetFriendsProvider   = {
 -- ── In-Game Friends Provider ──────────────────────────────────────────────────
 local InGameFriendsProvider = {
     type                 = "friend",
-    label                = L["Friends"],
+    label                = L["In-Game"],
     aliases              = { "f", "fr", "friend" },
     hideFromAutocomplete = true,
     preserveOrder        = true,

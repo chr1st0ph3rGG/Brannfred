@@ -314,7 +314,11 @@ showDescription = function(entry)
 
     descEntry = entry
     descIcon:SetTexture(entry.icon)
+    local dic = entry.iconColor
+    descIcon:SetVertexColor(dic and dic.r or 1, dic and dic.g or 1, dic and dic.b or 1)
     descName:SetText(entry.name)
+    local nc = entry.color
+    descName:SetTextColor(nc and nc.r or 1, nc and nc.g or 0.82, nc and nc.b or 0, 1)
 
     local statsStr = entry.getStats and entry.getStats() or ""
     descStats:SetText(statsStr)
@@ -384,6 +388,8 @@ local function updateResults(query)
         local c = entry.color
         rows[i].entry = entry
         rows[i].icon:SetTexture(entry.icon)
+        local ic = entry.iconColor
+        rows[i].icon:SetVertexColor(ic and ic.r or 1, ic and ic.g or 1, ic and ic.b or 1)
         rows[i].text:SetText(entry.name)
         rows[i].text:SetTextColor(c and c.r or 0.95, c and c.g or 0.95, c and c.b or 0.95, 1)
         rows[i].typeLabel:SetText(getTypeLabel(entry._originalType or entry.type))
