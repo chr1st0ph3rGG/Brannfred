@@ -5,24 +5,45 @@
 -- Ctrl+Click    → open world map, navigate to nearest objective / turn-in
 -- Alt+Click     → set TomTom arrow to nearest objective / turn-in
 
-local L              = LibStub("AceLocale-3.0"):GetLocale("Brannfred_Quests")
+local L                 = LibStub("AceLocale-3.0"):GetLocale("Brannfred_Quests")
 
-local ICON_ACTIVE    = "Interface/AddOns/Questie/Icons/incomplete" -- gray ?
-local ICON_COMPLETE  = "Interface/AddOns/Questie/Icons/complete"   -- yellow ?
+local ICON_ACTIVE       = "Interface/AddOns/Questie/Icons/incomplete" -- gray ?
+local ICON_COMPLETE     = "Interface/AddOns/Questie/Icons/complete" -- yellow ?
 
-local COLOR_ACTIVE   = { r = 1, g = 0.82, b = 0 }
-local COLOR_COMPLETE = { r = 0.2, g = 1, b = 0.2 }
-local COLOR_FAILED   = { r = 0.5, g = 0.5, b = 0.5 }
-local LABEL_COLOR    = { r = 0.4, g = 0.8, b = 0.4 }
+local ICON_COLOR_FAILED = { r = 1, g = 0.2, b = 0.2 }
+local LABEL_COLOR       = { r = 0.4, g = 0.8, b = 0.4 }
+
+-- Returns the WoW difficulty color for a quest level relative to the player.
+-- Uses GetQuestDifficultyColor if available (Classic 1.14+), otherwise falls back
+-- to a manual calculation with GetQuestGreenRange().
+local function difficultyColor(level)
+    if GetQuestDifficultyColor then
+        local c = GetQuestDifficultyColor(level)
+        return { r = c.r, g = c.g, b = c.b }
+    end
+    local player = UnitLevel("player")
+    local diff   = level - player
+    if diff >= 5 then
+        return { r = 1.0, g = 0.1, b = 0.1 }    -- red
+    elseif diff >= 3 then
+        return { r = 1.0, g = 0.5, b = 0.25 }   -- orange
+    elseif diff >= -2 then
+        return { r = 1.0, g = 1.0, b = 0.0 }    -- yellow
+    elseif -diff < (GetQuestGreenRange and GetQuestGreenRange() or 8) then
+        return { r = 0.25, g = 0.75, b = 0.25 } -- green
+    else
+        return { r = 0.5, g = 0.5, b = 0.5 }    -- gray
+    end
+end
 
 -- ── Questie module references ──────────────────────────────────────────────────
 -- QuestieLoader is the only Questie global; everything else is accessed through it.
 -- These are live references to the module tables – functions will be present once
 -- Questie finishes loading (guaranteed by OptionalDeps: Questie in the TOC).
-local QPlayer        = QuestieLoader and QuestieLoader:ImportModule("QuestiePlayer")
-local QDistUtils     = QuestieLoader and QuestieLoader:ImportModule("DistanceUtils")
-local QZoneDB        = QuestieLoader and QuestieLoader:ImportModule("ZoneDB")
-local QDB            = QuestieLoader and QuestieLoader:ImportModule("QuestieDB")
+local QPlayer    = QuestieLoader and QuestieLoader:ImportModule("QuestiePlayer")
+local QDistUtils = QuestieLoader and QuestieLoader:ImportModule("DistanceUtils")
+local QZoneDB    = QuestieLoader and QuestieLoader:ImportModule("ZoneDB")
+local QDB        = QuestieLoader and QuestieLoader:ImportModule("QuestieDB")
 
 -- ── GetQuestLogTitle return order (no suggestedGroup in this WoW build) ────────
 -- 1:title  2:level  3:questTag  4:isHeader  5:isCollapsed
@@ -160,7 +181,7 @@ end
 -- ── Provider ───────────────────────────────────────────────────────────────────
 local QuestsProvider = {
     type         = "quest",
-    label        = L["Quest Log"],
+    label        = L["Quests"],
     aliases      = { "q" },
     providerIcon = "Interface/ICONS/INV_Misc_Note_06",
     color        = COLOR_ACTIVE,
@@ -181,10 +202,8 @@ function QuestsProvider:OnEnable()
         if not isHeader and title and title ~= "" and questID and questID > 0 then
             local complete = (isComplete == 1)
             local failed   = (isComplete == -1)
-            local color    = failed and COLOR_FAILED
-                or complete and COLOR_COMPLETE
-                or COLOR_ACTIVE
             local lvl      = level or 0
+            local color    = difficultyColor(lvl)
 
             -- Cache objectives now so we don't call SelectQuestLogEntry at hover time
             SelectQuestLogEntry(i)
@@ -210,21 +229,22 @@ function QuestsProvider:OnEnable()
                 cachedStats = ""
             end
 
-            local entry = {
-                name       = title,
+            local entry                     = {
+                name       = complete and (title .. " |cff55ff55(" .. L["Completed"] .. ")|r") or title,
                 icon       = complete and ICON_COMPLETE or ICON_ACTIVE,
                 type       = "quest",
                 color      = color,
+                iconColor  = failed and ICON_COLOR_FAILED or nil,
                 labelColor = LABEL_COLOR,
                 _questID   = questID,
             }
-            entry.getMeta        = function() return lvl > 0 and ("L" .. lvl) or "" end
-            entry.getStats       = function() return cachedStats end
-            entry.getDesc        = function() return cachedDesc end
-            entry.onActivate     = function() openQuestInLog(questID) end
-            entry.onShiftActivate = function() linkQuestInChat(questID, title, lvl) end
-            entry.onCtrlActivate  = function() showQuestOnMap(questID) end
-            entry.onAltActivate   = function() setTomTomWaypoint(questID, title) end
+            entry.getMeta                   = function() return lvl > 0 and ("L" .. lvl) or "" end
+            entry.getStats                  = function() return cachedStats end
+            entry.getDesc                   = function() return cachedDesc end
+            entry.onActivate                = function() openQuestInLog(questID) end
+            entry.onShiftActivate           = function() linkQuestInChat(questID, title, lvl) end
+            entry.onCtrlActivate            = function() showQuestOnMap(questID) end
+            entry.onAltActivate             = function() setTomTomWaypoint(questID, title) end
 
             self.entries[#self.entries + 1] = entry
         end
