@@ -99,6 +99,23 @@ local function processSlot(entryMap, slot, charName, charKey, locType, locationL
                 PickupItem(entry._itemLink)
             end
         end
+        entry.ctrlKeepsOpen = function()
+            local p = Brannfred.db and Brannfred.db.profile
+            return p and p.ctrlKeepsOpen_item ~= false
+        end
+        entry.onCtrlActivate = function()
+            if not entry._itemLink then return end
+            local itemEquipLoc = select(9, GetItemInfo(entry._itemLink))
+            if itemEquipLoc and itemEquipLoc ~= "" and itemEquipLoc ~= "INVTYPE_NON_EQUIP" then
+                DressUpItemLink(entry._itemLink)
+            end
+        end
+        entry.onIconTooltip = function(anchor)
+            if not entry._itemLink then return end
+            GameTooltip:SetOwner(anchor, "ANCHOR_RIGHT")
+            GameTooltip:SetHyperlink(entry._itemLink)
+            GameTooltip:Show()
+        end
         entryMap[slot.itemID] = entry
         InventoryProvider.entries[#InventoryProvider.entries + 1] = entry
     end
@@ -155,11 +172,20 @@ end
 -- ── Options ───────────────────────────────────────────────────────────────────
 Brannfred:RegisterProviderOptions("Inventory", L["Inventory"], {
     closeOnDrag = {
-        type = "toggle",
-        name = L["Close frame on drag"],
-        desc = L["Close the search frame when dragging to the action bar"],
-        get  = function() return Brannfred.db.profile.closeOnDrag_item end,
-        set  = function(_, val) Brannfred.db.profile.closeOnDrag_item = val end,
+        type  = "toggle",
+        name  = L["Close frame on drag"],
+        desc  = L["Close the search frame when dragging to the action bar"],
+        order = 1,
+        get   = function() return Brannfred.db.profile.closeOnDrag_item end,
+        set   = function(_, val) Brannfred.db.profile.closeOnDrag_item = val end,
+    },
+    ctrlKeepsOpen = {
+        type  = "toggle",
+        name  = L["Keep frame open on Ctrl+click"],
+        desc  = L["Keep the search frame open when using Ctrl+click to try on items"],
+        order = 2,
+        get   = function() return Brannfred.db.profile.ctrlKeepsOpen_item ~= false end,
+        set   = function(_, val) Brannfred.db.profile.ctrlKeepsOpen_item = val end,
     },
 })
 

@@ -138,10 +138,20 @@ descFrame:Hide()
 local descIconBtn = CreateFrame("Button", nil, descFrame)
 descIconBtn:SetSize(48, 48)
 descIconBtn:SetPoint("TOPLEFT", descFrame, "TOPLEFT", 8, -8)
-descIconBtn:EnableMouse(false)
+descIconBtn:EnableMouse(true)
 local descIcon = descIconBtn:CreateTexture(nil, "ARTWORK")
 descIcon:SetAllPoints()
 descIcon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+local descEntry = nil
+descIconBtn:SetScript("OnEnter", function(self)
+    if descEntry and descEntry.onIconTooltip then
+        descEntry.onIconTooltip(self)
+    end
+end)
+descIconBtn:SetScript("OnLeave", function()
+    GameTooltip:Hide()
+end)
 
 local descName = descFrame:CreateFontString(nil, "OVERLAY")
 descName:SetFont(main_font, 14, "OUTLINE")
@@ -198,12 +208,23 @@ for i = 1, MAX_RESULTS do
     local iconBtn = CreateFrame("Button", nil, row)
     iconBtn:SetSize(22, 22)
     iconBtn:SetPoint("LEFT", row, "LEFT", 6, 0)
-    iconBtn:EnableMouse(false)
+    iconBtn:EnableMouse(true)
     local icon = iconBtn:CreateTexture(nil, "ARTWORK")
     icon:SetAllPoints()
     icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
     row.iconBtn = iconBtn
     row.icon    = icon
+    iconBtn:SetScript("OnEnter", function(self)
+        if row.entry then
+            selectRow(i)
+            if row.entry.onIconTooltip then
+                row.entry.onIconTooltip(self)
+            end
+        end
+    end)
+    iconBtn:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
 
     -- Type label (right-aligned, gray)
     local typeLabel = row:CreateFontString(nil, "OVERLAY")
@@ -251,7 +272,8 @@ for i = 1, MAX_RESULTS do
                 return
             end
             if IsControlKeyDown() and self.entry.onCtrlActivate then
-                frame:Hide()
+                local keepOpen = type(self.entry.ctrlKeepsOpen) == "function" and self.entry.ctrlKeepsOpen() or self.entry.ctrlKeepsOpen
+                if not keepOpen then frame:Hide() end
                 self.entry.onCtrlActivate()
                 return
             end
@@ -286,9 +308,11 @@ end
 showDescription = function(entry)
     if not entry or entry._noPreview then
         descFrame:Hide()
+        descEntry = nil
         return
     end
 
+    descEntry = entry
     descIcon:SetTexture(entry.icon)
     descName:SetText(entry.name)
 
@@ -409,7 +433,8 @@ editBox:SetScript("OnKeyDown", function(self, key)
                 return
             end
             if IsControlKeyDown() and selected.entry.onCtrlActivate then
-                frame:Hide()
+                local keepOpen = type(selected.entry.ctrlKeepsOpen) == "function" and selected.entry.ctrlKeepsOpen() or selected.entry.ctrlKeepsOpen
+                if not keepOpen then frame:Hide() end
                 selected.entry.onCtrlActivate()
                 self:SetPropagateKeyboardInput(false)
                 return

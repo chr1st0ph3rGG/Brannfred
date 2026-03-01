@@ -161,6 +161,11 @@ function SpellsProvider:OnEnable()
                         entry.getDesc = function()
                             return GetSpellDescription and GetSpellDescription(entry._spellID) or ""
                         end
+                        entry.onIconTooltip = function(anchor)
+                            GameTooltip:SetOwner(anchor, "ANCHOR_RIGHT")
+                            GameTooltip:SetSpellByID(entry._spellID)
+                            GameTooltip:Show()
+                        end
 
                         if not showAllRanks then
                             spellMap[name] = entry

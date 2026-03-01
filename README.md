@@ -29,11 +29,21 @@ Brannfred comes with a bunch of powerful modules from the get-go
 
 Simple search inside your Spellbook. Trade skills (i.e. opening any of the crafting menus) can be opened directly from Brannfred. Skills and so on can be dragged into your Action Bars.
 
+- **`Enter`** — casts the spell (profession/trade skills only; combat spells cannot be cast from the search bar).
+- **Drag** — picks up the spell so you can drop it onto an Action Bar slot.
+- **Hover over icon** — shows the full spell tooltip including cast time, range, cost, and cooldown.
+
 ### Inventory
 
 **Prefix:** `!b`, `!bag`, or `!inv`
 
-This Module requires the Syndicator Addon to be installed. Simply search within your Brannfred search bar for pretty much everything in your inventory, bank, or other characters' inventory. Additionally, if you have Bagnator installed you will be led to the corresponding inventory/bank space where the item gets highlighted. `Shift-Enter` on an item entry will open the chat and provide the item link ready to send.
+This Module requires the Syndicator Addon to be installed. Simply search within your Brannfred search bar for pretty much everything in your inventory, bank, or other characters' inventory. Additionally, if you have Baganator installed you will be led to the corresponding inventory/bank space where the item gets highlighted.
+
+- **`Enter`** — opens your bags (or bank) and highlights the item via Baganator if available.
+- **`Shift-Enter`** — inserts the item link into the active chat input.
+- **`Ctrl-Enter`** — opens the Dressing Room for equippable items. The search frame stays open so you can try on multiple items in a row (configurable in the Inventory options).
+- **Drag** — picks up the item so you can move it or link it.
+- **Hover over icon** — shows the full item tooltip.
 
 ### Quests
 
@@ -167,10 +177,12 @@ Brannfred:RegisterProvider(MyProvider)
 | `getDesc()`         | —        | Returns a longer description shown below the separator line.               |
 | `onActivate()`      | —        | Called on `Enter` or left-click.                                           |
 | `onDrag()`          | —        | Called when the row is dragged (e.g. `PickupSpellBookItem`).               |
-| `onShiftActivate()` | —        | Called on `Shift-Enter`.                                                   |
-| `onCtrlActivate()`  | —        | Called on `Ctrl-Enter`.                                                    |
-| `onAltActivate()`   | —        | Called on `Alt-Enter`.                                                     |
-| `_noPreview`        | —        | `true` → suppresses the description panel for this entry.                  |
+| `onShiftActivate()` | —        | Called on `Shift-Enter`.                                                                                                                                          |
+| `onCtrlActivate()`  | —        | Called on `Ctrl-Enter`. The frame closes afterwards unless `ctrlKeepsOpen` is set.                                                                                |
+| `onAltActivate()`   | —        | Called on `Alt-Enter`.                                                                                                                                            |
+| `ctrlKeepsOpen`     | —        | `true` or a function returning a boolean. When truthy the search frame stays open after `onCtrlActivate` fires. Use a function to read a live DB setting.         |
+| `onIconTooltip(anchor)` | —    | Called when the cursor enters the entry's icon (both in the result rows and the description panel). `anchor` is the icon button frame. Show a `GameTooltip` here. |
+| `_noPreview`        | —        | `true` → suppresses the description panel for this entry.                                                                                                         |
 
 ### Dynamic providers
 
