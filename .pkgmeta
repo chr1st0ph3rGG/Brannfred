@@ -5,6 +5,17 @@ ignore:
   - scripts
   - media
 
+move-folders:
+  Providers/Calculator: ../Brannfred_Calc
+  Providers/EquipSets: ../Brannfred_EquipSets
+  Providers/Friends: ../Brannfred_Friends
+  Providers/History: ../Brannfred_History
+  Providers/Inventory: ../Brannfred_Inventory
+  Providers/ItemDB: ../Brannfred_ItemDB
+  Providers/Menus: ../Brannfred_Menus
+  Providers/Quests: ../Brannfred_Quests
+  Providers/Spells: ../Brannfred_Spells
+
 optional-dependencies:
   - 914482-baganator
   - 18808-tomtom
