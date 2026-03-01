@@ -6,15 +6,15 @@ ignore:
   - media
 
 move-folders:
-  Providers/Calculator: ../Brannfred_Calc
-  Providers/EquipSets: ../Brannfred_EquipSets
-  Providers/Friends: ../Brannfred_Friends
-  Providers/History: ../Brannfred_History
-  Providers/Inventory: ../Brannfred_Inventory
-  Providers/ItemDB: ../Brannfred_ItemDB
-  Providers/Menus: ../Brannfred_Menus
-  Providers/Quests: ../Brannfred_Quests
-  Providers/Spells: ../Brannfred_Spells
+  Brannfred/Providers/Calculator: Brannfred_Calc
+  Brannfred/Providers/EquipSets: Brannfred_EquipSets
+  Brannfred/Providers/Friends: Brannfred_Friends
+  Brannfred/Providers/History: Brannfred_History
+  Brannfred/Providers/Inventory: Brannfred_Inventory
+  Brannfred/Providers/ItemDB: Brannfred_ItemDB
+  Brannfred/Providers/Menus: Brannfred_Menus
+  Brannfred/Providers/Quests: Brannfred_Quests
+  Brannfred/Providers/Spells: Brannfred_Spells
 
 optional-dependencies:
   - 914482-baganator
