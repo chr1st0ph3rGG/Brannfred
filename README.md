@@ -3,7 +3,7 @@
 [![Github Repository](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/chr1st0ph3rGG/Brannfred)
 [![CurseForge Downloads](https://img.shields.io/curseforge/dt/1473403)](https://www.curseforge.com/wow/addons/brannfred)
 
-Brannfred brings a spotlight-style search bar to WoW Anniversary. One keybind opens a floating input where you can fuzzy-search spells, quests, inventory, equipment sets, and more — all from a single place, without knowing where to look first.
+Brannfred brings a spotlight-style search bar to WoW Anniversary. One keybind opens a floating input where you can fuzzy-search spells, quests, inventory, items, equipment sets, and more — all from a single place, without knowing where to look first.
 
 Use a bang prefix (e.g. `!s` or `!spell`) to narrow results to a specific source. Other addons can register their own data sources via the provider API.
 
@@ -39,9 +39,14 @@ Simple search inside your Spellbook. Trade skills (i.e. opening any of the craft
 
 This Module requires the Syndicator Addon to be installed. Simply search within your Brannfred search bar for pretty much everything in your inventory, bank, or other characters' inventory. Additionally, if you have Baganator installed you will be led to the corresponding inventory/bank space where the item gets highlighted.
 
-- **`Enter`** — opens your bags (or bank) and highlights the item via Baganator if available.
+Item names are coloured by quality (grey / white / green / blue / purple / orange).
+
+The click behaviour for equippable and consumable items is configurable in the Inventory options:
+
+- **Mode "Show in bags on click" (default):** `Enter` opens your bags and highlights the item; `Ctrl-Enter` uses or equips the item directly.
+- **Mode "Use / equip on click":** `Enter` uses or equips the item directly; `Ctrl-Enter` opens your bags and highlights it instead. Non-usable items always open the bags regardless of mode.
+
 - **`Shift-Enter`** — inserts the item link into the active chat input.
-- **`Ctrl-Enter`** — opens the Dressing Room for equippable items. The search frame stays open so you can try on multiple items in a row (configurable in the Inventory options).
 - **Drag** — picks up the item so you can move it or link it.
 - **Hover over icon** — shows the full item tooltip.
 
@@ -49,7 +54,26 @@ This Module requires the Syndicator Addon to be installed. Simply search within 
 
 **Prefix:** `!q` or `!quest`
 
-This Module requires the Questie Addon. It lets you search your quest log: `Enter` will open the quest in your Quest Log, `Shift-Enter` will provide a link to the quest in Chat, `Ctrl-Enter` will show the Quest on the Map, and `Alt-Enter` will set a TomTom Waypoint to the next Quest objective (TomTom is not required to use this Module but this functionality will do nothing if TomTom is not installed).
+This Module requires the Questie Addon. It lets you search your quest log.
+
+Quest names are coloured by level difficulty relative to your character (red / orange / yellow / green / grey). Completed quests show a light-green **(Completed)** suffix; failed quests have their icon tinted red.
+
+- **`Enter`** — opens the quest in your Quest Log.
+- **`Shift-Enter`** — posts a quest link in chat.
+- **`Ctrl-Enter`** — opens the World Map and navigates to the nearest objective or turn-in NPC.
+- **`Alt-Enter`** — sets a TomTom waypoint to the nearest objective or turn-in (TomTom is not required, but this action does nothing without it).
+
+### Item Database
+
+**Prefix:** `!idb` or `!itemdb`
+
+Search for items you don't currently own. Item names are coloured by quality (grey / white / green / blue / purple / orange) and the meta column shows the item sub-type (e.g. *Sword*, *Cloth*, *Potion*).
+
+Requires the **Ludwig** addon. Its pre-built database (~15 000+ items) is available immediately from the first search.
+
+- **`Shift-Enter`** — inserts the item link into the active chat input.
+- **`Ctrl-Enter`** — opens the Dressing Room for equippable items.
+- **Hover over icon** — shows the full item tooltip.
 
 ### Calculator
 
@@ -170,6 +194,7 @@ Brannfred:RegisterProvider(MyProvider)
 | `icon`              | yes      | Texture path or FileDataID.                                                |
 | `type`              | yes      | Must equal `provider.type`.                                                |
 | `color`             | —        | `{r,g,b}` override for the entry name text.                                |
+| `iconColor`         | —        | `{r,g,b}` tint applied to the entry icon via `SetVertexColor` (e.g. red for failed quests). Defaults to white (no tint). |
 | `labelColor`        | —        | `{r,g,b}` override for the type label.                                     |
 | `searchName`        | —        | Alternative string used for fuzzy matching (e.g. `"Fireball Rank 5"`).     |
 | `getMeta()`         | —        | Returns a short string for the meta column (color escape codes supported). |
