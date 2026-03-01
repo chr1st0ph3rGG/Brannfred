@@ -3,8 +3,7 @@
 ## Title: Brannfred – Item DB
 ## Notes: Search the item database for items you don't own (!idb, !itemdb)
 ## Author: chr1st0ph3rGG
-## Dependencies: Brannfred
-## OptionalDeps: Ludwig
+## Dependencies: Brannfred, Ludwig
 
 Locales\enUS.lua
 Locales\deDE.lua
