@@ -1,5 +1,5 @@
 ## Interface: 20505
-## Version: 1.1.0
+## Version: @project-version@
 ## Title: Brannfred – Menus
 ## Notes: Menu provider for Brannfred
 ## Author: chr1st0ph3rGG

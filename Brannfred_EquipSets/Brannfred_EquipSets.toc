@@ -1,5 +1,5 @@
 ## Interface: 20505
-## Version: 1.1.0
+## Version: @project-version@
 ## Title: Brannfred – Equipment Sets
 ## Notes: Equipment Sets provider for Brannfred (requires ItemRack)
 ## Author: chr1st0ph3rGG
