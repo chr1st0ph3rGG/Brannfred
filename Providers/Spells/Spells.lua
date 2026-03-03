@@ -227,5 +227,8 @@ local function onSpellsChanged()
     SpellsProvider:OnEnable()
     Brannfred:RebuildHistory()
 end
-Brannfred:RegisterEvent("LEARNED_SPELL_IN_TAB", onSpellsChanged)
+Brannfred:RegisterEvent("SPELLS_CHANGED", onSpellsChanged)
+if C_EventUtils and C_EventUtils.IsEventValid("LEARNED_SPELL_IN_TAB") then
+    Brannfred:RegisterEvent("LEARNED_SPELL_IN_TAB", onSpellsChanged)
+end
 Brannfred:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", onSpellsChanged)

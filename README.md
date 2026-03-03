@@ -15,7 +15,7 @@ The Brannfred Frame is completely customizable; you can change border, colors, a
 
 There are three ways to open the search bar:
 
-- **Keybind** — Go to \_Game Menu → Key Bindings → Other and bind a key to **"Toggle Brannfred search"**. This is the recommended way. Default is `Ctrl-+`.
+- **Keybind** — Open the Brannfred settings and click the **"Toggle Brannfred search"** button in the *Key binding* section. This is the recommended way.
 - **Slash commands** — Type `/brannfred` or `/bfrd` in chat to toggle the frame.
 - **Minimap icon** — Left-click the Brannfred minimap button.
 

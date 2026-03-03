@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.0
+
+### New Features
+
+- Classic support — Brannfred now runs on Classic (Anniversary / Era / Hardcore / SoD); MoP Support will be added with the next Version
+
+### Changes
+
+- Keybinding: replaced the `Bindings.xml` approach with a custom in-game key-capture dialog accessible from the options panel, since it generated some annyoing warnings.
+- Appearance: font and border dropdowns now use LibSharedMedia-3.0 — fonts are previewed in their own typeface (via LibDDI-1.0) and additional media registered by other addons (e.g. SharedMedia) is available automatically
+
+### Bugfix
+
+- Fixed a Event related bug in the Spell Provider
+
 ## 1.2.3
 
 ### Bugfix

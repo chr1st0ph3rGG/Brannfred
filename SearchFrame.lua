@@ -1,4 +1,5 @@
 local L               = LibStub("AceLocale-3.0"):GetLocale("Brannfred")
+local LSM             = LibStub("LibSharedMedia-3.0")
 local MSQ             = LibStub("Masque", true)
 
 Brannfred.searchFrame = CreateFrame("Frame", "BrannfredSearchFrame", UIParent, "BackdropTemplate")
@@ -527,7 +528,7 @@ function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-s
     if not Brannfred.db then return end
     local p     = Brannfred.db.profile or {}
     local w     = p.frameWidth or 420
-    local fpath = p.fontPath or "fonts/frizqt__.ttf"
+    local fpath = LSM:Fetch("font", p.fontPath) or "fonts/frizqt__.ttf"
     local fsize = p.fontSize or 13
 
     -- Width (results/desc follow the main frame width)
@@ -555,8 +556,8 @@ function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-s
 
     -- Border
     local bs                 = p.borderSize or 1
-    local btex               = p.borderTexture or "Interface/Buttons/WHITE8X8"
-    local edgeFile           = (btex == "none" or bs == 0) and "" or btex
+    local btex               = LSM:Fetch("border", p.borderTexture) or "Interface/Buttons/WHITE8X8"
+    local edgeFile           = (bs == 0) and "" or btex
     local bd                 = { edgeFile = edgeFile, edgeSize = bs }
 
     local bgr, bgg, bgb, bga = p.bgR or 0.07, p.bgG or 0.07, p.bgB or 0.07, p.bgA or 0.93

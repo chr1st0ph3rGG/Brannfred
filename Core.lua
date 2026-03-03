@@ -1,18 +1,18 @@
-Brannfred = LibStub("AceAddon-3.0"):NewAddon("Brannfred", "AceConsole-3.0", "AceEvent-3.0")
+Brannfred                 = LibStub("AceAddon-3.0"):NewAddon("Brannfred", "AceConsole-3.0", "AceEvent-3.0")
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Brannfred")
-local C = LibStub("C_Everywhere")
-_G["BINDING_NAME_CLICK BrannfredToggleButton:LeftButton"] = L["Toggle Brannfred search"]
+local L                   = LibStub("AceLocale-3.0"):GetLocale("Brannfred")
+local C                   = LibStub("C_Everywhere")
+local LSM                 = LibStub("LibSharedMedia-3.0")
 
-Brannfred.providers        = {}
-Brannfred.providerOptions  = {}  -- { key, name, args } per provider
-Brannfred.history          = {}  -- session history, most recent first
+Brannfred.providers       = {}
+Brannfred.providerOptions = {}  -- { key, name, args } per provider
+Brannfred.history         = {}  -- session history, most recent first
 
-local HISTORY_MAX = 20
+local HISTORY_MAX         = 20
 
 function Brannfred.AddToHistory(entry)
     if not entry then return end
-    local original = entry._originalEntry or entry  -- unwrap history wrappers
+    local original = entry._originalEntry or entry -- unwrap history wrappers
 
     -- Move to top if already present (dedup by name + original type)
     for i, h in ipairs(Brannfred.history) do
@@ -23,21 +23,21 @@ function Brannfred.AddToHistory(entry)
     end
 
     table.insert(Brannfred.history, 1, {
-        name              = original.name,
-        icon              = original.icon,
-        type              = "history",
-        color             = original.color,
-        labelColor        = original.labelColor,
-        getMeta           = original.getMeta,
-        getStats          = original.getStats,
-        getDesc           = original.getDesc,
-        onActivate        = original.onActivate,
-        onShiftActivate   = original.onShiftActivate,
-        onCtrlActivate    = original.onCtrlActivate,
-        onAltActivate     = original.onAltActivate,
-        onDrag            = original.onDrag,
-        _originalType     = original.type,
-        _originalEntry    = original,
+        name            = original.name,
+        icon            = original.icon,
+        type            = "history",
+        color           = original.color,
+        labelColor      = original.labelColor,
+        getMeta         = original.getMeta,
+        getStats        = original.getStats,
+        getDesc         = original.getDesc,
+        onActivate      = original.onActivate,
+        onShiftActivate = original.onShiftActivate,
+        onCtrlActivate  = original.onCtrlActivate,
+        onAltActivate   = original.onAltActivate,
+        onDrag          = original.onDrag,
+        _originalType   = original.type,
+        _originalEntry  = original,
     })
 
     while #Brannfred.history > HISTORY_MAX do
@@ -115,43 +115,6 @@ function Brannfred:RebuildHistory()
     end
 end
 
-local BORDER_TEXTURE_VALUES = {
-    ["none"]                                              = "None",
-    ["Interface/Buttons/WHITE8X8"]                        = "Solid",
-    ["Interface/Tooltips/UI-Tooltip-Border"]              = "Tooltip",
-    ["Interface/DialogFrame/UI-DialogBox-Border"]         = "Dialog",
-    ["Interface/DialogFrame/UI-DialogBox-Gold-Border"]    = "Dialog (Gold)",
-    ["Interface/FriendsFrame/UI-Toast-Border"]            = "Toast",
-}
-
--- Native edgeSize for each texture — keeps 9-slice corners sharp.
-local BORDER_TEXTURE_SIZE = {
-    ["none"]                                              = 0,
-    ["Interface/Buttons/WHITE8X8"]                        = 1,
-    ["Interface/Tooltips/UI-Tooltip-Border"]              = 16,
-    ["Interface/DialogFrame/UI-DialogBox-Border"]         = 32,
-    ["Interface/DialogFrame/UI-DialogBox-Gold-Border"]    = 32,
-    ["Interface/FriendsFrame/UI-Toast-Border"]            = 12,
-}
-
--- Visual inset at native size (= opaque border pixels, used as default contentPadding).
-local BORDER_TEXTURE_INSET = {
-    ["none"]                                              = 0,
-    ["Interface/Buttons/WHITE8X8"]                        = 1,
-    ["Interface/Tooltips/UI-Tooltip-Border"]              = 5,
-    ["Interface/DialogFrame/UI-DialogBox-Border"]         = 11,
-    ["Interface/DialogFrame/UI-DialogBox-Gold-Border"]    = 11,
-    ["Interface/FriendsFrame/UI-Toast-Border"]            = 4,
-}
-
-local FONT_VALUES = {
-    ["fonts/frizqt__.ttf"]       = "FrizQuadrata (Standard)",
-    ["fonts/arialn.ttf"]         = "Arial Narrow",
-    ["fonts/morpheus.ttf"]       = "Morpheus",
-    ["fonts/skurri.ttf"]         = "Skurri",
-    ["fonts/LifeCraft_Font.ttf"] = "LifeCraft",
-}
-
 local ANCHOR_VALUES = {
     CENTER      = "Center",
     TOP         = "Top",
@@ -180,7 +143,7 @@ end
 --   args        : AceConfig args table with the actual options
 function Brannfred:RegisterProviderOptions(key, displayName, args)
     table.insert(self.providerOptions, { key = key, name = displayName, args = args })
-    if self.db then  -- OnInitialize already ran → register on the spot
+    if self.db then -- OnInitialize already ran → register on the spot
         LibStub("AceConfig-3.0"):RegisterOptionsTable("Brannfred_" .. key, {
             name = displayName,
             type = "group",
@@ -192,24 +155,30 @@ end
 
 local defaults = {
     profile = {
-        frameWidth        = 420,
-        visibleRows       = 10,
-        fontSize          = 13,
-        fontPath          = "fonts/frizqt__.ttf",
-        posAnchor         = "TOP",
-        posX              = 0,
-        posY              = -280,
+        frameWidth = 420,
+        visibleRows = 10,
+        fontSize = 13,
+        fontPath = "Friz Quadrata TT",
+        posAnchor = "TOP",
+        posX = 0,
+        posY = -280,
         closeOnDrag_spell = true,
-        closeOnDrag_item  = true,
-        borderTexture     = "Interface/Buttons/WHITE8X8",
-        borderSize        = 1,
-        contentPadding    = 1,
-        bgR               = 0.07, bgG = 0.07, bgB = 0.07, bgA = 0.93,
-        borderR           = 0.25, borderG = 0.25, borderB = 0.25, borderA = 1.0,
+        closeOnDrag_item = true,
+        borderTexture = "Solid",
+        borderSize = 1,
+        contentPadding = 1,
+        bgR = 0.07,
+        bgG = 0.07,
+        bgB = 0.07,
+        bgA = 0.93,
+        borderR = 0.25,
+        borderG = 0.25,
+        borderB = 0.25,
+        borderA = 1.0,
         minimap           = { hide = false },
         useMasque         = false,
-        disabledProviders = {},  -- { [providerType] = true } → hidden in global search
-        history           = {},  -- { { name, icon, _originalType }, ... }
+        disabledProviders = {}, -- { [providerType] = true } → hidden in global search
+        history           = {}, -- { { name, icon, _originalType }, ... }
     },
 }
 
@@ -223,15 +192,23 @@ local function OpenBlizOptions()
 end
 
 function Brannfred:OnInitialize()
+    -- Register built-in border textures with LibSharedMedia
+    LSM:Register("border", "None",        "Interface/Buttons/WHITE8X8")  -- edgeSize 0 → no visible border
+    LSM:Register("border", "Solid",       "Interface/Buttons/WHITE8X8")
+    LSM:Register("border", "Tooltip",     "Interface/Tooltips/UI-Tooltip-Border")
+    LSM:Register("border", "Dialog",      "Interface/DialogFrame/UI-DialogBox-Border")
+    LSM:Register("border", "Dialog Gold", "Interface/DialogFrame/UI-DialogBox-Gold-Border")
+    LSM:Register("border", "Toast",       "Interface/FriendsFrame/UI-Toast-Border")
+
     self.db = LibStub("AceDB-3.0"):New("BrannfredDB", defaults, true)
 
     self:RegisterChatCommand("brannfred", "OnToggleFrame")
-    self:RegisterChatCommand("bfrd",      "OnToggleFrame")
+    self:RegisterChatCommand("bfrd", "OnToggleFrame")
 
     local ldb = LibStub("LibDataBroker-1.1"):NewDataObject("Brannfred", {
-        type  = "launcher",
-        icon  = "Interface/ICONS/INV_Misc_Spyglass_02",
-        OnClick = function(_, button)
+        type          = "launcher",
+        icon          = "Interface/ICONS/INV_Misc_Spyglass_02",
+        OnClick       = function(_, button)
             if button == "RightButton" then
                 OpenBlizOptions()
             else
@@ -241,13 +218,15 @@ function Brannfred:OnInitialize()
         OnTooltipShow = function(tt)
             tt:AddLine("Brannfred")
             tt:AddLine(L["Left-click to toggle search"], 1, 1, 1)
-            tt:AddLine(L["Right-click for settings"],    1, 1, 1)
+            tt:AddLine(L["Right-click for settings"], 1, 1, 1)
         end,
     })
     LibStub("LibDBIcon-1.0"):Register("Brannfred", ldb, self.db.profile.minimap)
 
-    local function get(k)   return function()    return self.db.profile[k]    end end
-    local function set(k)   return function(_, v) self.db.profile[k] = v; self.ApplyFrameSettings() end end
+    local function get(k) return function() return self.db.profile[k] end end
+    local function set(k) return function(_, v)
+            self.db.profile[k] = v; self.ApplyFrameSettings()
+        end end
 
     -- Main Brannfred page — appearance & position
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Brannfred", {
@@ -261,35 +240,51 @@ function Brannfred:OnInitialize()
                 order  = 1,
                 args   = {
                     frameWidth = {
-                        type  = "range",
-                        name  = L["Width"],
-                        desc  = L["Width of the search frame"],
-                        min   = 300, max = 800, step = 10,
+                        type = "range",
+                        name = L["Width"],
+                        desc = L["Width of the search frame"],
+                        min = 300,
+                        max = 800,
+                        step = 10,
                         order = 1,
                         get   = get("frameWidth"),
                         set   = set("frameWidth"),
                     },
                     visibleRows = {
-                        type  = "range",
-                        name  = L["Visible rows"],
-                        desc  = L["Number of visible result rows"],
-                        min   = 3, max = 20, step = 1,
+                        type = "range",
+                        name = L["Visible rows"],
+                        desc = L["Number of visible result rows"],
+                        min = 3,
+                        max = 20,
+                        step = 1,
                         order = 2,
                         get   = get("visibleRows"),
                         set   = set("visibleRows"),
                     },
                     fontPath = {
-                        type   = "select",
-                        name   = L["Font"],
-                        order  = 3,
-                        values = FONT_VALUES,
-                        get    = get("fontPath"),
-                        set    = set("fontPath"),
+                        type        = "select",
+                        name        = L["Font"],
+                        order       = 3,
+                        values      = function() return LSM:List("font") end,
+                        itemControl = "DDI-Font",
+                        get         = function()
+                            local list = LSM:List("font")
+                            local current = self.db.profile.fontPath
+                            for i, v in next, list do
+                                if v == current then return i end
+                            end
+                        end,
+                        set         = function(_, value)
+                            self.db.profile.fontPath = LSM:List("font")[value]
+                            self.ApplyFrameSettings()
+                        end,
                     },
                     fontSize = {
-                        type  = "range",
-                        name  = L["Font size"],
-                        min   = 8, max = 24, step = 1,
+                        type = "range",
+                        name = L["Font size"],
+                        min = 8,
+                        max = 24,
+                        step = 1,
                         order = 4,
                         get   = get("fontSize"),
                         set   = set("fontSize"),
@@ -328,33 +323,36 @@ function Brannfred:OnInitialize()
                         type   = "select",
                         name   = L["Border texture"],
                         order  = 7,
-                        values = BORDER_TEXTURE_VALUES,
-                        get    = get("borderTexture"),
-                        set    = function(_, v)
-                            local p = self.db.profile
-                            p.borderTexture = v
-                            -- snap to native edgeSize so 9-slice corners stay sharp
-                            local native = BORDER_TEXTURE_SIZE[v]
-                            if native then
-                                p.borderSize     = native
-                                p.contentPadding = BORDER_TEXTURE_INSET[v] or native
+                        values = function() return LSM:List("border") end,
+                        get    = function()
+                            local list = LSM:List("border")
+                            local current = self.db.profile.borderTexture
+                            for i, v in next, list do
+                                if v == current then return i end
                             end
+                        end,
+                        set    = function(_, value)
+                            self.db.profile.borderTexture = LSM:List("border")[value]
                             self.ApplyFrameSettings()
                         end,
                     },
                     borderSize = {
-                        type  = "range",
-                        name  = L["Border size"],
-                        min   = 0, max = 32, step = 1,
+                        type = "range",
+                        name = L["Border size"],
+                        min = 0,
+                        max = 32,
+                        step = 1,
                         order = 8,
                         get   = get("borderSize"),
                         set   = set("borderSize"),
                     },
                     contentPadding = {
-                        type  = "range",
-                        name  = L["Content padding"],
-                        desc  = L["Inner spacing between border and content"],
-                        min   = 0, max = 40, step = 1,
+                        type = "range",
+                        name = L["Content padding"],
+                        desc = L["Inner spacing between border and content"],
+                        min = 0,
+                        max = 40,
+                        step = 1,
                         order = 9,
                         get   = get("contentPadding"),
                         set   = set("contentPadding"),
@@ -404,20 +402,48 @@ function Brannfred:OnInitialize()
                         set    = set("posAnchor"),
                     },
                     posX = {
-                        type  = "range",
-                        name  = L["X Offset"],
-                        min   = -1000, max = 1000, step = 1,
+                        type = "range",
+                        name = L["X Offset"],
+                        min = -1000,
+                        max = 1000,
+                        step = 1,
                         order = 2,
                         get   = get("posX"),
                         set   = set("posX"),
                     },
                     posY = {
-                        type  = "range",
-                        name  = L["Y Offset"],
-                        min   = -800, max = 800, step = 1,
+                        type = "range",
+                        name = L["Y Offset"],
+                        min = -800,
+                        max = 800,
+                        step = 1,
                         order = 3,
                         get   = get("posY"),
                         set   = set("posY"),
+                    },
+                },
+            },
+            keybinding = {
+                type   = "group",
+                name   = L["Key binding"],
+                inline = true,
+                order  = 3,
+                args   = {
+                    toggleKeyDesc = {
+                        type  = "description",
+                        name  = L["Click to assign a keyboard shortcut"],
+                        order = 0,
+                    },
+                    toggleKey = {
+                        type  = "execute",
+                        name  = function()
+                            local key = GetBindingKey("CLICK BrannfredToggleButton:LeftButton")
+                            return L["Toggle Brannfred search"] .. "  [" .. (key or L["No key bound"]) .. "]"
+                        end,
+                        desc  = L["Click to assign a keyboard shortcut"],
+                        func  = function() Brannfred.OpenKeybindCapture() end,
+                        width = "full",
+                        order = 1,
                     },
                 },
             },
@@ -425,7 +451,7 @@ function Brannfred:OnInitialize()
                 type   = "group",
                 name   = L["Search providers"],
                 inline = true,
-                order  = 3,
+                order  = 4,
                 args   = {
                     activeProviders = {
                         type   = "multiselect",
@@ -441,10 +467,10 @@ function Brannfred:OnInitialize()
                             end
                             return t
                         end,
-                        get = function(_, key)
+                        get    = function(_, key)
                             return not self.db.profile.disabledProviders[key]
                         end,
-                        set = function(_, key, val)
+                        set    = function(_, key, val)
                             self.db.profile.disabledProviders[key] = not val or nil
                         end,
                     },
@@ -452,7 +478,8 @@ function Brannfred:OnInitialize()
             },
         },
     })
-    Brannfred.optionsPanel, Brannfred.optionsCategoryID = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Brannfred", "Brannfred")
+    Brannfred.optionsPanel, Brannfred.optionsCategoryID = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Brannfred",
+        "Brannfred")
 
     -- Profile management sub-page
     LibStub("AceConfig-3.0"):RegisterOptionsTable("Brannfred_Profile",
@@ -513,8 +540,8 @@ function Brannfred:OnToggleFrame(input)
         if self.db then
             local p      = self.db.profile or {}
             local anchor = p.posAnchor or "TOP"
-            local posX   = p.posX      or 0
-            local posY   = p.posY      or -280
+            local posX   = p.posX or 0
+            local posY   = p.posY or -280
             self.searchFrame:ClearAllPoints()
             self.searchFrame:SetPoint(anchor, UIParent, anchor, posX, posY)
         end

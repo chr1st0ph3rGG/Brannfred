@@ -10,6 +10,15 @@ L["Search..."]               = true
 -- Options: groups
 L["Appearance"]              = true
 L["Position"]                = true
+L["Key binding"]             = true
+
+-- Options: key binding
+L["Set key binding"]              = true
+L["Click to assign a keyboard shortcut"] = true
+L["No key bound"]                 = true
+L["Press a key to bind..."]       = true
+L["ESC to cancel, DEL to clear"]  = true
+L["Current"]                      = true
 
 -- Options: appearance
 L["Width"]                   = true
