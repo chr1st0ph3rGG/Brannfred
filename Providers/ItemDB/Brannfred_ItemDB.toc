@@ -1,4 +1,4 @@
-## Interface: 20505,11508
+## Interface: 20505, 11508, 50503
 ## Version: @project-version@
 ## Title: Brannfred – Item DB
 ## Notes: Search the item database for items you don't own (!idb, !itemdb)

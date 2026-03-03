@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.1
+
+### Changes
+
+- Classic MoP Support - Only the Equipment Set Provider is not yet working since it will require me to implement Blizzards Equipment Manager (Which I most likeley will not do now since I don't play Classic MoP)
+
 ## 1.3.0
 
 ### New Features

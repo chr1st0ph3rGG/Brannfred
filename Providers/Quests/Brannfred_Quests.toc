@@ -1,4 +1,4 @@
-## Interface: 20505,11508
+## Interface: 20505, 11508, 50503
 ## Version: @project-version@
 ## Title: Brannfred – Quests
 ## Notes: Quest provider for Brannfred
