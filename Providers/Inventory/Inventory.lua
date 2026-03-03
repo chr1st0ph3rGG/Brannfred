@@ -2,10 +2,8 @@
 -- Searches bag and bank contents across all characters via Syndicator.
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Brannfred_Inventory")
--- C_Container.UseContainerItem is the current API in Classic 1.14+; fall back
--- to the legacy global for older builds.
-local useContainerItem = (C_Container and C_Container.UseContainerItem) ---@diagnostic disable-line: undefined-global
-    or _G["UseContainerItem"]
+local C = LibStub("C_Everywhere")
+local useContainerItem = C.Container.UseContainerItem
 
 -- ── Baganator integration ─────────────────────────────────────────────────────
 -- Opens the right Baganator frame and highlights the item.
@@ -43,21 +41,21 @@ end
 -- (e.g. quest-starting items).
 local function isUsableItem(itemID)
     if not itemID then return false end
-    if GetItemInfoInstant then
-        local _, _, _, equipLoc, _, classID = GetItemInfoInstant(itemID)
+    if C.Item.GetItemInfoInstant then
+        local _, _, _, equipLoc, _, classID = C.Item.GetItemInfoInstant(itemID)
         if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
             return true  -- equippable
         end
         if classID == 0 then return true end  -- consumable
     else
-        local _, _, _, _, _, itemType, _, _, equipLoc = GetItemInfo(itemID)
+        local _, _, _, _, _, itemType, _, _, equipLoc = C.Item.GetItemInfo(itemID)
         if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
             return true
         end
         if itemType == "Consumable" then return true end
     end
     -- Items with a use effect (e.g. quest starters, special items)
-    return GetItemSpell ~= nil and GetItemSpell(itemID) ~= nil ---@diagnostic disable-line: undefined-global
+    return C.Item.GetItemSpell and C.Item.GetItemSpell(itemID) ~= nil
 end
 
 -- Equips or uses the item.
@@ -67,8 +65,8 @@ end
 local function useItemFromBags(entry, itemID)
     -- Equippable: equip directly, bypassing any quest-start prompt
     if itemID then
-        local equipLoc = GetItemInfoInstant and select(4, GetItemInfoInstant(itemID)) ---@diagnostic disable-line: undefined-global
-            or select(9, GetItemInfo(itemID))
+        local equipLoc = C.Item.GetItemInfoInstant and select(4, C.Item.GetItemInfoInstant(itemID))
+            or select(9, C.Item.GetItemInfo(itemID))
         if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
             _G.EquipItemByName(itemID)
             return true
@@ -111,11 +109,11 @@ local function processSlot(entryMap, slot, charName, charKey, locType, locationL
     if not (slot and slot.itemID and slot.itemID ~= 0) then return end
 
     local name = slot.itemLink and slot.itemLink:match("%[(.-)%]")
-        or GetItemInfo(slot.itemID)
+        or C.Item.GetItemInfo(slot.itemID)
     if not name then return end
 
     if not entryMap[slot.itemID] then
-        local _, _, quality = GetItemInfo(slot.itemID)
+        local _, _, quality = C.Item.GetItemInfo(slot.itemID)
         local itemID = slot.itemID
         local entry = {
             name       = name,
@@ -174,7 +172,7 @@ local function processSlot(entryMap, slot, charName, charKey, locType, locationL
         entry.onShiftActivate = function()
             if not entry._itemLink then return end
             local link = entry._itemLink
-            C_Timer.After(0, function()
+            C.Timer.After(0, function()
                 local chatEdit = ChatEdit_GetActiveWindow()
                 if not (chatEdit and chatEdit:IsVisible()) then
                     ChatEdit_ActivateChat(DEFAULT_CHAT_FRAME.editBox)

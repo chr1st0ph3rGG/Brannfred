@@ -3,3 +3,4 @@ BrannfredToggleButton:RegisterForClicks("AnyUp")
 BrannfredToggleButton:SetScript("OnClick", function()
     Brannfred:OnToggleFrame()
 end)
+

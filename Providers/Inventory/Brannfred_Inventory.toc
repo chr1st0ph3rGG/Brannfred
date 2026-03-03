@@ -1,4 +1,4 @@
-## Interface: 20505
+## Interface: 20505,11508
 ## Version: @project-version@
 ## Title: Brannfred – Inventory
 ## Notes: Bag and bank search via Syndicator

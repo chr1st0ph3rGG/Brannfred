@@ -6,6 +6,7 @@
 -- Alt+Click     → set TomTom arrow to nearest objective / turn-in
 
 local L                 = LibStub("AceLocale-3.0"):GetLocale("Brannfred_Quests")
+local C                 = LibStub("C_Everywhere")
 
 local ICON_ACTIVE       = "Interface/AddOns/Questie/Icons/incomplete" -- gray ?
 local ICON_COMPLETE     = "Interface/AddOns/Questie/Icons/complete" -- yellow ?
@@ -17,8 +18,8 @@ local LABEL_COLOR       = { r = 0.4, g = 0.8, b = 0.4 }
 -- Uses GetQuestDifficultyColor if available (Classic 1.14+), otherwise falls back
 -- to a manual calculation with GetQuestGreenRange().
 local function difficultyColor(level)
-    if GetQuestDifficultyColor then
-        local c = GetQuestDifficultyColor(level)
+    if C.QuestLog.GetQuestDifficultyColor then
+        local c = C.QuestLog.GetQuestDifficultyColor(level)
         return { r = c.r, g = c.g, b = c.b }
     end
     local player = UnitLevel("player")
@@ -29,7 +30,7 @@ local function difficultyColor(level)
         return { r = 1.0, g = 0.5, b = 0.25 }   -- orange
     elseif diff >= -2 then
         return { r = 1.0, g = 1.0, b = 0.0 }    -- yellow
-    elseif -diff < (GetQuestGreenRange and GetQuestGreenRange() or 8) then
+    elseif -diff < (C.QuestLog.GetQuestGreenRange and C.QuestLog.GetQuestGreenRange() or 8) then
         return { r = 0.25, g = 0.75, b = 0.25 } -- green
     else
         return { r = 0.5, g = 0.5, b = 0.5 }    -- gray
@@ -50,9 +51,9 @@ local QDB        = QuestieLoader and QuestieLoader:ImportModule("QuestieDB")
 -- 6:isComplete  7:frequency  8:questID
 
 local function findQuestLogIndex(questID)
-    local numEntries = GetNumQuestLogEntries()
+    local numEntries = C.QuestLog.GetNumQuestLogEntries()
     for i = 1, numEntries do
-        local _, _, _, isHeader, _, _, _, qID = GetQuestLogTitle(i)
+        local _, _, _, isHeader, _, _, _, qID = C.QuestLog.GetQuestLogTitle(i)
         if not isHeader and qID == questID then return i end
     end
     return nil
@@ -61,7 +62,7 @@ end
 -- ── Action: link quest in chat ────────────────────────────────────────────────
 local function linkQuestInChat(questID, questName, level)
     local link = string.format("|cffffff00|Hquest:%d:%d|h[%s]|h|r", questID, level or 0, questName)
-    C_Timer.After(0, function()
+    C.Timer.After(0, function()
         local chatEdit = ChatEdit_GetActiveWindow()
         if not (chatEdit and chatEdit:IsVisible()) then
             ChatEdit_ActivateChat(DEFAULT_CHAT_FRAME.editBox)
@@ -74,10 +75,10 @@ end
 -- ── Action: open quest log ─────────────────────────────────────────────────────
 local function openQuestInLog(questID)
     -- GetQuestLogIndexByID is faster; fall back to manual search if missing
-    local idx = (GetQuestLogIndexByID and GetQuestLogIndexByID(questID))
+    local idx = (C.QuestLog.GetQuestLogIndexByID and C.QuestLog.GetQuestLogIndexByID(questID))
         or findQuestLogIndex(questID)
     if idx and idx > 0 then
-        SelectQuestLogEntry(idx)
+        C.QuestLog.SelectQuestLogEntry(idx)
     end
     -- Support WideQuestLogPlus (QuestLogExFrame), ClassicQuestLog, default
     local questFrame = QuestLogExFrame or ClassicQuestLog or QuestLogFrame
@@ -193,11 +194,11 @@ local QuestsProvider = {
 function QuestsProvider:OnEnable()
     self.entries = {}
 
-    local savedSel = GetQuestLogSelection and GetQuestLogSelection()
-    local numEntries = GetNumQuestLogEntries()
+    local savedSel = C.QuestLog.GetQuestLogSelection and C.QuestLog.GetQuestLogSelection()
+    local numEntries = C.QuestLog.GetNumQuestLogEntries()
 
     for i = 1, numEntries do
-        local title, level, _, isHeader, _, isComplete, _, questID = GetQuestLogTitle(i)
+        local title, level, _, isHeader, _, isComplete, _, questID = C.QuestLog.GetQuestLogTitle(i)
 
         if not isHeader and title and title ~= "" and questID and questID > 0 then
             local complete = (isComplete == 1)
@@ -206,11 +207,11 @@ function QuestsProvider:OnEnable()
             local color    = difficultyColor(lvl)
 
             -- Cache objectives now so we don't call SelectQuestLogEntry at hover time
-            SelectQuestLogEntry(i)
-            local totalObj, doneObj = GetNumQuestLeaderBoards(), 0
+            C.QuestLog.SelectQuestLogEntry(i)
+            local totalObj, doneObj = C.QuestLog.GetNumQuestLeaderBoards(), 0
             local objLines = {}
             for j = 1, totalObj do
-                local text, _, done = GetQuestLogLeaderBoard(j)
+                local text, _, done = C.QuestLog.GetQuestLogLeaderBoard(j)
                 if text and text ~= "" then
                     objLines[#objLines + 1] =
                         (done and "|cff00ff00" or "|cffcccccc") .. text .. "|r"
@@ -251,7 +252,7 @@ function QuestsProvider:OnEnable()
     end
 
     if savedSel and savedSel > 0 then
-        SelectQuestLogEntry(savedSel)
+        C.QuestLog.SelectQuestLogEntry(savedSel)
     end
 end
 

@@ -1,0 +1,10 @@
+lightweight tag 08ce8fe613f5a4e904220fc294223c2e25b9c8f1 18-08ce8fe
+Author:	GitHub <noreply@github.com>
+Date:	Wed Feb 18 22:37:42 2026 +0000
+
+commit 08ce8fe613f5a4e904220fc294223c2e25b9c8f1
+Author: João Cardoso <442637+Jaliborc@users.noreply.github.com>
+Date:   Wed Feb 18 22:37:42 2026 +0000
+
+    Update README.md
+

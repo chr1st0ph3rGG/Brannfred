@@ -1,11 +1,12 @@
 -- ── Friends Provider ───────────────────────────────────────────────────────────
--- Two providers share the !f alias:
---   BNetFriendsProvider  (type "bnet")   — Battle.net friends
---   InGameFriendsProvider (type "friend") — in-game character friends
+-- Two providers, both visible under !f:
+--   BNetFriendsProvider  (type "bnet")   — combined list (in-game + Battle.net, sorted)
+--   InGameFriendsProvider (type "friend") — in-game friends only (!fr / !friend)
 -- Click → pre-fill /w <name> in the chat box.
--- Sort priority: online in-game > online BNet > offline (all alphabetical within group).
+-- Sort priority in combined list: online in-game > online BNet > offline (all alphabetical within group).
 
 local L             = LibStub("AceLocale-3.0"):GetLocale("Brannfred_Friends")
+local C             = LibStub("C_Everywhere")
 
 local COLOR_ONLINE  = { r = 0.2, g = 1.0, b = 0.2 }
 local COLOR_OFFLINE = { r = 0.45, g = 0.45, b = 0.45 }
@@ -27,7 +28,7 @@ local function getClassIcon(localizedClass)
 end
 
 local function openWhisper(target)
-    C_Timer.After(0, function()
+    C.Timer.After(0, function()
         local chatEdit = ChatEdit_GetActiveWindow()
         if not (chatEdit and chatEdit:IsVisible()) then
             ChatEdit_ActivateChat(DEFAULT_CHAT_FRAME.editBox)
@@ -52,11 +53,10 @@ local BNetFriendsProvider   = {
 
 -- ── In-Game Friends Provider ──────────────────────────────────────────────────
 local InGameFriendsProvider = {
-    type                 = "friend",
-    label                = L["In-Game"],
-    aliases              = { "f", "fr", "friend" },
-    hideFromAutocomplete = true,
-    preserveOrder        = true,
+    type          = "friend",
+    label         = L["In-Game"],
+    aliases       = { "f", "fr", "friend" },
+    preserveOrder = true,
     providerIcon         = "Interface/ICONS/INV_Misc_GroupLooking",
     color                = COLOR_ONLINE,
     labelColor           = LABEL_INGAME,
@@ -144,8 +144,7 @@ local function rebuildBNet()
             entry.onActivate              = function() openWhisper(entry._friendId) end
             entry.onShiftActivate         = function()
                 if entry._charName == "" then return end -- not in WoW, can't invite
-                ---@diagnostic disable-next-line: undefined-global
-                C_PartyInfo.InviteUnit(entry._charName)
+                        C.PartyInfo.InviteUnit(entry._charName)
             end
 
             bnetEntries[#bnetEntries + 1] = entry
@@ -156,9 +155,9 @@ end
 local function rebuildIngame()
     ingameEntries = {}
 
-    local num = C_FriendList.GetNumFriends()
+    local num = C.FriendList.GetNumFriends()
     for i = 1, num do
-        local info = C_FriendList.GetFriendInfoByIndex(i)
+        local info = C.FriendList.GetFriendInfoByIndex(i)
         if info and info.name then
             local online                      = info.connected and true or false
             local entry                       = {
@@ -191,8 +190,7 @@ local function rebuildIngame()
             entry.onActivate                  = function() openWhisper(info.name) end
             entry.onShiftActivate             = function()
                 if not entry._online then return end
-                ---@diagnostic disable-next-line: undefined-global
-                InviteUnit(info.name)
+                C.PartyInfo.InviteUnit(info.name)
             end
 
             ingameEntries[#ingameEntries + 1] = entry
@@ -223,7 +221,7 @@ local function rebuildAll()
     end)
 
     BNetFriendsProvider.entries   = merged
-    InGameFriendsProvider.entries = {}
+    InGameFriendsProvider.entries = ingameEntries
 end
 
 function BNetFriendsProvider:OnEnable()
@@ -243,5 +241,5 @@ Brannfred:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED", rebuildAll)
 Brannfred:RegisterEvent("BN_FRIEND_INFO_CHANGED", rebuildAll)
 Brannfred:RegisterEvent("FRIENDLIST_UPDATE", rebuildAll)
 Brannfred:RegisterEvent("PLAYER_ENTERING_WORLD", function()
-    C_FriendList.ShowFriends()
+    C.FriendList.ShowFriends()
 end)

@@ -9,6 +9,7 @@
 -- Ctrl+Enter   → open Dressing Room (equippable items)
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Brannfred_ItemDB")
+local C = LibStub("C_Everywhere")
 
 -- Ludwig_Items is set in OnEnable after LoadAddOn("Ludwig_Data") is called.
 -- Do NOT capture it at file-load time — Ludwig_Data is LoadOnDemand and not yet loaded.
@@ -91,7 +92,7 @@ local ItemDBProvider = {
 
 local function makeEntry(itemID, name)
     -- Try to resolve icon & quality from client cache; may be nil for unknown items
-    local _, _, quality, _, _, _, _, _, _, texture = GetItemInfo(itemID)
+    local _, _, quality, _, _, _, _, _, _, texture = C.Item.GetItemInfo(itemID)
 
     local entry = {
         name       = name,
@@ -104,17 +105,17 @@ local function makeEntry(itemID, name)
     }
 
     local function getLink()
-        return select(2, GetItemInfo(itemID))
+        return select(2, C.Item.GetItemInfo(itemID))
     end
 
     -- Shift+Enter: insert item link into the active chat editbox
     entry.onShiftActivate = function()
         local link = getLink()
         if not link then
-            GetItemInfo(itemID)
+            C.Item.GetItemInfo(itemID)
             return
         end
-        C_Timer.After(0, function()
+        C.Timer.After(0, function()
             local chatEdit = ChatEdit_GetActiveWindow()
             if not (chatEdit and chatEdit:IsVisible()) then
                 ChatEdit_ActivateChat(DEFAULT_CHAT_FRAME.editBox)
@@ -128,7 +129,7 @@ local function makeEntry(itemID, name)
     entry.onCtrlActivate = function()
         local link = getLink()
         if not link then return end
-        local equipLoc = select(9, GetItemInfo(itemID))
+        local equipLoc = select(9, C.Item.GetItemInfo(itemID))
         if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
             DressUpItemLink(link)
         end
@@ -149,7 +150,7 @@ local function makeEntry(itemID, name)
 
     -- Right meta column: item subtype (e.g. "Sword", "Cloth"), refreshed on each render
     entry.getMeta = function()
-        local _, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
+        local _, _, _, _, _, itemType, itemSubType = C.Item.GetItemInfo(itemID)
         return itemSubType or itemType or ""
     end
 
@@ -182,8 +183,7 @@ end
 function ItemDBProvider:OnEnable()
     -- Ludwig_Data is LoadOnDemand — trigger it now if Ludwig is present
     if _G["Ludwig"] then
-        local loadAddOn = C_AddOns and C_AddOns.LoadAddOn or _G["LoadAddOn"]
-        loadAddOn("Ludwig_Data")
+        C.AddOns.LoadAddOn("Ludwig_Data")
         Ludwig_Items = _G["Ludwig_Items"]
     end
 
@@ -203,7 +203,7 @@ function ItemDBProvider:OnEnable()
         local box = Brannfred.searchEditBox
         if not (box and box:IsVisible()) then return end
         refreshPending = true
-        C_Timer.After(0.2, function()
+        C.Timer.After(0.2, function()
             refreshPending = false
             local b = Brannfred.searchEditBox
             if b and b:IsVisible() then

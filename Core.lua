@@ -1,6 +1,7 @@
 Brannfred = LibStub("AceAddon-3.0"):NewAddon("Brannfred", "AceConsole-3.0", "AceEvent-3.0")
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Brannfred")
+local C = LibStub("C_Everywhere")
 _G["BINDING_NAME_CLICK BrannfredToggleButton:LeftButton"] = L["Toggle Brannfred search"]
 
 Brannfred.providers        = {}
@@ -518,6 +519,6 @@ function Brannfred:OnToggleFrame(input)
             self.searchFrame:SetPoint(anchor, UIParent, anchor, posX, posY)
         end
         self.searchFrame:Show()
-        C_Timer.After(0.05, function() Brannfred.searchEditBox:SetFocus() end)
+        C.Timer.After(0.05, function() Brannfred.searchEditBox:SetFocus() end)
     end
 end

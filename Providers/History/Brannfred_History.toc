@@ -1,4 +1,4 @@
-## Interface: 20505
+## Interface: 20505, 11508
 ## Version: @project-version@
 ## Title: Brannfred_History
 ## Notes: History provider for Brannfred

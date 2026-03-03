@@ -49,10 +49,12 @@ local PROFESSION_ANCHOR_IDS = {
     [18248] = true,
 }
 
+local C          = LibStub("C_Everywhere")
 local POWER_NAMES = { [0] = "Mana", [1] = "Rage", [2] = "Focus", [3] = "Energy" }
 
 local function buildStats(spellID)
-    local _, _, _, castTime, minRange, maxRange = GetSpellInfo(spellID)
+    local info = C.Spell.GetSpellInfo(spellID) or {}
+    local castTime, minRange, maxRange = info.castTime, info.minRange, info.maxRange
     local parts = {}
 
     if castTime == 0 then
@@ -67,15 +69,15 @@ local function buildStats(spellID)
         parts[#parts + 1] = "Melee range"
     end
 
-    if GetSpellPowerCost then
-        local costs = GetSpellPowerCost(spellID)
+    if C.Spell.GetSpellPowerCost then
+        local costs = C.Spell.GetSpellPowerCost(spellID)
         if costs and costs[1] and costs[1].cost > 0 then
             local powerName = POWER_NAMES[costs[1].type] or "Power"
             parts[#parts + 1] = costs[1].cost .. " " .. powerName
         end
     end
 
-    local _, cd = GetSpellCooldown(spellID)
+    local _, cd = C.Spell.GetSpellCooldown(spellID)
     if cd and cd > 1.5 then
         if cd >= 60 then
             parts[#parts + 1] = string.format("%d min cooldown", math.floor(cd / 60))
@@ -104,15 +106,15 @@ function SpellsProvider:OnEnable()
     self.entries       = {}
     local showAllRanks = Brannfred.db and Brannfred.db.profile.showAllRanks
     local spellMap     = {}
-    local numTabs      = GetNumSpellTabs()
+    local numTabs      = C.SpellBook.GetNumSpellTabs()
 
     for tab = 1, numTabs do
-        local _, _, offset, numEntries = GetSpellTabInfo(tab)
+        local _, _, offset, numEntries = C.SpellBook.GetSpellTabInfo(tab)
 
         -- Check if this tab is a profession tab
         local isProfTab = false
         for slot = offset + 1, offset + numEntries do
-            local _, spellID = GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
+            local _, spellID = C.SpellBook.GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
             if PROFESSION_ANCHOR_IDS[spellID] then
                 isProfTab = true
                 break
@@ -120,11 +122,11 @@ function SpellsProvider:OnEnable()
         end
 
         for slot = offset + 1, offset + numEntries do
-            local spellType, spellID = GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
+            local spellType, spellID = C.SpellBook.GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
             if spellType == "SPELL" then
-                local name, rank = GetSpellBookItemName(slot, BOOKTYPE_SPELL)
+                local name, rank = C.SpellBook.GetSpellBookItemName(slot, BOOKTYPE_SPELL)
                 if name then
-                    local icon     = GetSpellBookItemTexture(slot, BOOKTYPE_SPELL)
+                    local icon     = C.SpellBook.GetSpellBookItemTexture(slot, BOOKTYPE_SPELL)
                     local rankStr  = (rank and rank ~= "") and rank or nil
                     local existing = not showAllRanks and spellMap[name]
 
@@ -153,13 +155,13 @@ function SpellsProvider:OnEnable()
                             end
                         end
                         entry.onDrag = function()
-                            PickupSpellBookItem(entry._slot, BOOKTYPE_SPELL)
+                            C.SpellBook.PickupSpellBookItem(entry._slot, BOOKTYPE_SPELL)
                         end
                         entry.getStats = function()
                             return buildStats(entry._spellID)
                         end
                         entry.getDesc = function()
-                            return GetSpellDescription and GetSpellDescription(entry._spellID) or ""
+                            return C.Spell.GetSpellDescription and C.Spell.GetSpellDescription(entry._spellID) or ""
                         end
                         entry.onIconTooltip = function(anchor)
                             GameTooltip:SetOwner(anchor, "ANCHOR_RIGHT")
