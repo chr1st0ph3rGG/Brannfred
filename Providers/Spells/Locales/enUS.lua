@@ -3,6 +3,9 @@ if not L then return end
 
 L["Spellbook"]                                              = true
 L["Spells"]                                                 = true
+L["Cast"]                                                   = true
+L["Open profession"]                                        = true
+L["Link in Chat"]                                           = true
 L["Show all spell ranks"]                                   = true
 L["Show all skill ranks instead of only the highest"]       = true
 L["Close frame on drag"]                                    = true

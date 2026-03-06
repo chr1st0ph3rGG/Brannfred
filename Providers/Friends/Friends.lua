@@ -57,10 +57,10 @@ local InGameFriendsProvider = {
     label         = L["In-Game"],
     aliases       = { "f", "fr", "friend" },
     preserveOrder = true,
-    providerIcon         = "Interface/ICONS/INV_Misc_GroupLooking",
-    color                = COLOR_ONLINE,
-    labelColor           = LABEL_INGAME,
-    entries              = {},
+    providerIcon  = "Interface/ICONS/INV_Misc_GroupLooking",
+    color         = COLOR_ONLINE,
+    labelColor    = LABEL_INGAME,
+    entries       = {},
 }
 
 -- Module-level staging tables; rebuildAll() merges them.
@@ -101,11 +101,11 @@ local function rebuildBNet()
                 end
             end
 
-            local hasChar    = charName and charName ~= "" and charName ~= friendId
-            local displayName = hasChar
+            local hasChar                 = charName and charName ~= "" and charName ~= friendId
+            local displayName             = hasChar
                 and (charName .. " |cff88aaff(" .. friendId .. ")|r")
                 or friendId
-            local searchName  = hasChar and (charName .. " " .. friendId) or nil
+            local searchName              = hasChar and (charName .. " " .. friendId) or nil
 
             local entry                   = {
                 name       = displayName,
@@ -141,11 +141,22 @@ local function rebuildBNet()
             end
 
             entry.getDesc                 = function() return entry._note end
-            entry.onActivate              = function() openWhisper(entry._friendId) end
-            entry.onShiftActivate         = function()
-                if entry._charName == "" then return end -- not in WoW, can't invite
-                        C.PartyInfo.InviteUnit(entry._charName)
-            end
+            entry.context_actions         = {
+                {
+                    name     = L["Whisper"],
+                    func     = function() openWhisper(entry._friendId) end,
+                    modifier = "primary",
+                },
+                {
+                    name     = L["Invite to Party"],
+                    func     = function()
+                        if entry._charName ~= "" then
+                            C.PartyInfo.InviteUnit(entry._charName)
+                        end
+                    end,
+                    modifier = "shift",
+                },
+            }
 
             bnetEntries[#bnetEntries + 1] = entry
         end
@@ -187,11 +198,22 @@ local function rebuildIngame()
             end
 
             entry.getDesc                     = function() return entry._note end
-            entry.onActivate                  = function() openWhisper(info.name) end
-            entry.onShiftActivate             = function()
-                if not entry._online then return end
-                C.PartyInfo.InviteUnit(info.name)
-            end
+            entry.context_actions             = {
+                {
+                    name     = L["Whisper"],
+                    func     = function() openWhisper(info.name) end,
+                    modifier = "primary",
+                },
+                {
+                    name     = L["Invite to Party"],
+                    func     = function()
+                        if entry._online then
+                            C.PartyInfo.InviteUnit(info.name)
+                        end
+                    end,
+                    modifier = "shift",
+                },
+            }
 
             ingameEntries[#ingameEntries + 1] = entry
         end
@@ -232,6 +254,22 @@ end
 function InGameFriendsProvider:OnEnable()
     -- intentionally empty — BNetFriendsProvider.OnEnable handles both
 end
+
+-- ── Options ───────────────────────────────────────────────────────────────────
+local friendActionNames = { L["Whisper"], L["Invite to Party"] }
+local friendModDefaults = { primary = L["Whisper"], shift = L["Invite to Party"] }
+
+local bnetArgs          = {}
+for k, v in pairs(Brannfred.GetModifierBindingArgs("bnet", friendActionNames, friendModDefaults)) do
+    bnetArgs[k] = v
+end
+Brannfred:RegisterProviderOptions("BNetFriends", L["Battle.net"], bnetArgs)
+
+local ingameArgs = {}
+for k, v in pairs(Brannfred.GetModifierBindingArgs("friend", friendActionNames, friendModDefaults)) do
+    ingameArgs[k] = v
+end
+Brannfred:RegisterProviderOptions("InGameFriends", L["In-Game"], ingameArgs)
 
 -- ── Registration ───────────────────────────────────────────────────────────────
 Brannfred:RegisterProvider(BNetFriendsProvider)

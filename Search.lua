@@ -74,9 +74,13 @@ function Brannfred.Search(query, maxResults)
         local skip = false
         if partial ~= "" then
             for _, p in ipairs(Brannfred.providers) do
-                if p.type == partial then skip = true; break end
+                if p.type == partial then
+                    skip = true; break
+                end
                 for _, a in ipairs(p.aliases or {}) do
-                    if a == partial then skip = true; break end
+                    if a == partial then
+                        skip = true; break
+                    end
                 end
                 if skip then break end
             end
@@ -104,13 +108,19 @@ function Brannfred.Search(query, maxResults)
                     local entry
                     if provider.directActivate then
                         entry = {
-                            name       = provider.label or provider.type,
-                            icon       = icon,
-                            type       = provider.type,
-                            color      = provider.labelColor or { r = 0.8, g = 0.8, b = 0.8 },
-                            labelColor = { r = 0.45, g = 0.45, b = 0.45 },
-                            getMeta    = function() return "!" .. shortAlias end,
-                            onActivate = provider.directActivate,
+                            name            = provider.label or provider.type,
+                            icon            = icon,
+                            type            = provider.type,
+                            color           = provider.labelColor or { r = 0.8, g = 0.8, b = 0.8 },
+                            labelColor      = { r = 0.45, g = 0.45, b = 0.45 },
+                            getMeta         = function() return "!" .. shortAlias end,
+                            context_actions = {
+                                {
+                                    name     = provider.label or provider.type,
+                                    func     = provider.directActivate,
+                                    modifier = "primary",
+                                },
+                            },
                         }
                     else
                         entry = {

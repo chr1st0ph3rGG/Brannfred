@@ -59,3 +59,13 @@ L["Profiles"]                                             = "Profile"
 
 -- Config provider
 L["Settings"]                                             = "Einstellungen"
+L["Open Settings"]                                        = "Einstellungen öffnen"
+
+-- Modifier key binding options / context menu
+L["Modifier key shortcuts"]                               = "Tastenkürzel"
+L["Left-click / Enter"]                                   = "Linksklick / Enter"
+L["Shift"]                                                = "Shift"
+L["Ctrl"]                                                 = "Strg"
+L["Alt"]                                                  = "Alt"
+L["None"]                                                 = "Keine"
+L["Open"]                                                 = "Öffnen"

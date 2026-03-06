@@ -44,9 +44,9 @@ local function isUsableItem(itemID)
     if C.Item.GetItemInfoInstant then
         local _, _, _, equipLoc, _, classID = C.Item.GetItemInfoInstant(itemID)
         if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
-            return true  -- equippable
+            return true                      -- equippable
         end
-        if classID == 0 then return true end  -- consumable
+        if classID == 0 then return true end -- consumable
     else
         local _, _, _, _, _, itemType, _, _, equipLoc = C.Item.GetItemInfo(itemID)
         if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
@@ -76,7 +76,7 @@ local function useItemFromBags(entry, itemID)
     local currentChar = UnitName("player")
     for _, loc in ipairs(entry._locations) do
         if loc.char == currentChar and loc.locType == "bag"
-                and loc.bagIndex and loc.slotIndex then
+            and loc.bagIndex and loc.slotIndex then
             useContainerItem(loc.bagIndex, loc.slotIndex)
             return true
         end
@@ -86,12 +86,12 @@ end
 
 -- ── Quality colors ────────────────────────────────────────────────────────────
 local QUALITY_COLORS = {
-    [0] = { r = 0.62, g = 0.62, b = 0.62 },  -- Poor
-    [1] = { r = 1.00, g = 1.00, b = 1.00 },  -- Common
-    [2] = { r = 0.12, g = 1.00, b = 0.00 },  -- Uncommon
-    [3] = { r = 0.00, g = 0.44, b = 0.87 },  -- Rare
-    [4] = { r = 0.64, g = 0.21, b = 0.93 },  -- Epic
-    [5] = { r = 1.00, g = 0.50, b = 0.00 },  -- Legendary
+    [0] = { r = 0.62, g = 0.62, b = 0.62 }, -- Poor
+    [1] = { r = 1.00, g = 1.00, b = 1.00 }, -- Common
+    [2] = { r = 0.12, g = 1.00, b = 0.00 }, -- Uncommon
+    [3] = { r = 0.00, g = 0.44, b = 0.87 }, -- Rare
+    [4] = { r = 0.64, g = 0.21, b = 0.93 }, -- Epic
+    [5] = { r = 1.00, g = 0.50, b = 0.00 }, -- Legendary
 }
 
 -- ── Provider ──────────────────────────────────────────────────────────────────
@@ -142,34 +142,7 @@ local function processSlot(entryMap, slot, charName, charKey, locType, locationL
             return table.concat(lines, "\n")
         end
 
-        local function clickMode()
-            local p = Brannfred.db and Brannfred.db.profile
-            return p and p.inventoryClickMode or "show"
-        end
-
-        -- Click: use/equip (mode "use") or show in bags (mode "show").
-        -- Non-usable items always show in bags regardless of mode.
-        entry.onActivate = function()
-            if clickMode() == "use" and isUsableItem(itemID) then
-                if not useItemFromBags(entry, itemID) then showInBags(entry) end
-            else
-                showInBags(entry)
-            end
-        end
-
-        -- Ctrl+Click: show in bags (mode "use") or use/equip (mode "show").
-        -- Non-usable items always show in bags.
-        entry.onCtrlActivate = function()
-            if clickMode() == "use" then
-                showInBags(entry)
-            elseif isUsableItem(itemID) then
-                if not useItemFromBags(entry, itemID) then showInBags(entry) end
-            else
-                showInBags(entry)
-            end
-        end
-
-        entry.onShiftActivate = function()
+        local function linkInChat()
             if not entry._itemLink then return end
             local link = entry._itemLink
             C.Timer.After(0, function()
@@ -181,6 +154,30 @@ local function processSlot(entryMap, slot, charName, charKey, locType, locationL
                 chatEdit:Insert(link)
             end)
         end
+
+        entry.context_actions = {
+            {
+                name     = L["Show in Bags"],
+                func     = function() showInBags(entry) end,
+                modifier = "primary",
+            },
+            {
+                name     = L["Use / Equip"],
+                func     = function()
+                    if isUsableItem(itemID) then
+                        if not useItemFromBags(entry, itemID) then showInBags(entry) end
+                    else
+                        showInBags(entry)
+                    end
+                end,
+                modifier = "ctrl",
+            },
+            {
+                name     = L["Link in Chat"],
+                func     = linkInChat,
+                modifier = "shift",
+            },
+        }
         entry.onDrag = function()
             if entry._itemLink then
                 PickupItem(entry._itemLink)
@@ -249,7 +246,7 @@ if Syndicator then
 end
 
 -- ── Options ───────────────────────────────────────────────────────────────────
-Brannfred:RegisterProviderOptions("Inventory", L["Inventory"], {
+local inventoryArgs = {
     closeOnDrag = {
         type  = "toggle",
         name  = L["Close frame on drag"],
@@ -258,18 +255,12 @@ Brannfred:RegisterProviderOptions("Inventory", L["Inventory"], {
         get   = function() return Brannfred.db.profile.closeOnDrag_item end,
         set   = function(_, val) Brannfred.db.profile.closeOnDrag_item = val end,
     },
-    clickMode = {
-        type   = "select",
-        name   = L["Click mode"],
-        desc   = L["What clicking an equippable or consumable item does"],
-        order  = 2,
-        values = {
-            show = L["Show in bags on click"],
-            use  = L["Use / equip on click"],
-        },
-        get = function() return Brannfred.db.profile.inventoryClickMode or "show" end,
-        set = function(_, v) Brannfred.db.profile.inventoryClickMode = v end,
-    },
-})
+}
+for k, v in pairs(Brannfred.GetModifierBindingArgs("item", {
+    L["Show in Bags"], L["Use / Equip"], L["Link in Chat"],
+}, { primary = L["Show in Bags"], shift = L["Link in Chat"] })) do
+    inventoryArgs[k] = v
+end
+Brannfred:RegisterProviderOptions("Inventory", L["Inventory"], inventoryArgs)
 
 Brannfred:RegisterProvider(InventoryProvider)

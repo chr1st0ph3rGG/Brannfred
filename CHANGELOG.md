@@ -1,5 +1,69 @@
 # Changelog
 
+## 2.0.0
+
+### Major Features
+
+- **Context Menu System** — Complete redesign of how Brannfred handles actions:
+  - Right-click on any result to open a context menu showing all available actions
+  - Press `Tab` to quickly open the context menu for the currently selected result
+  - Each action can be triggered via keybinding (modifier keys), mouse click, or number keys (1–0) in the menu
+  - All providers now use the new `context_actions` system instead of `onActivate`/`onShiftActivate`/`onCtrlActivate`/`onAltActivate`
+
+- **Modifier-based Action System** — Each entry can define multiple actions with different modifier keys:
+  - **Primary** (`Enter` / Left-click) — the main action
+  - **Shift**, **Ctrl**, **Alt** — hold these keys while pressing `Enter` or clicking for alternative actions
+  - All modifier key assignments are **configurable per provider** in the addon options
+  - Users can disable specific modifiers or reassign them as needed
+
+- **Comprehensive Localization** — Support for 9 languages:
+  - German (deDE), English (enUS), Spanish (esES), French (frFR), Italian (itIT), Korean (koKR), Portuguese (ptBR), Simplified Chinese (zhCN), Traditional Chinese (zhTW)
+  - All providers and UI strings are now fully translated in all supported languages
+
+- **New Context Menu UI** —
+  - Shows entry name and all available actions with their modifier hints (`[En]`, `[Sh]`, `[Ct]`, `[Al]`)
+  - Navigate with arrow keys or number keys
+  - Press `Enter` to activate, `Escape`/`Tab` to close
+
+### Changes
+
+- **Inventory provider** — Actions refactored to context system; UI changed from "click mode" config option to direct action selection in context menu
+- **Item Database, Quests, Spells, Friends, Equipment Sets, Menus providers** — All updated to use new context action system
+- **Calculator provider** — Refactored to use context actions with "Result" as the primary action
+- **Spell provider** — "Open profession" is now the primary action; "Link in Chat" is secondary (Shift)
+- **Quests provider** — Added "Open in Quest Log", "Link in Chat", "Show on Map", "TomTom Waypoint" as configurable actions
+- **Friends provider** — Added "Whisper" and "Invite to Party" actions with configurable modifiers
+- **README** — Extensively updated with documentation on the new context menu system, modifier keys, and provider API changes
+
+### Bugfixes
+
+- Removed "Combat Log" menu entry, was not working anyway
+
+### For Addon Developers
+
+If you're using the Brannfred Provider API, you must update your entries:
+
+**Old (1.x):**
+
+```lua
+entry.onActivate       = function() ... end
+entry.onShiftActivate  = function() ... end
+entry.onCtrlActivate   = function() ... end
+entry.onAltActivate    = function() ... end
+```
+
+**New (2.0):**
+
+```lua
+entry.context_actions = {
+    { name = "Action 1", func = function() ... end, modifier = "primary" },
+    { name = "Action 2", func = function() ... end, modifier = "shift" },
+    { name = "Action 3", func = function() ... end, modifier = "ctrl" },
+}
+```
+
+All entries **must** define at least one action (usually with `modifier = "primary"`). See the README for complete documentation.
+
 ## 1.3.1
 
 ### Changes

@@ -35,10 +35,16 @@ editBox:SetFont(main_font, 15, "")
 editBox:SetTextColor(0.95, 0.95, 0.95, 1)
 
 -- Constants
-local MAX_RESULTS  = 50
-local VISIBLE_ROWS = 10   -- may be updated by ApplyFrameSettings
-local CONTENT_PAD  = 1    -- may be updated by ApplyFrameSettings
-local ROW_HEIGHT   = 32
+local MAX_RESULTS    = 50
+local VISIBLE_ROWS   = 10 -- may be updated by ApplyFrameSettings
+local CONTENT_PAD    = 1  -- may be updated by ApplyFrameSettings
+local ROW_HEIGHT     = 32
+
+-- Context menu constants
+local MAX_CTX_ROWS   = 10
+local CTX_ROW_HEIGHT = 28
+local CTX_HEADER_H   = 28
+local CTX_WIDTH      = 210
 
 -- Type label lookup: reads the label field each provider declares
 local function getTypeLabel(entryType)
@@ -55,8 +61,20 @@ local currentResults = {}
 local selectedIndex  = 1
 local masqueGroup    = nil
 
+-- Context menu state
+local ctxMenuOpen    = false
+local ctxEntry       = nil
+local ctxActions     = {}
+local ctxSelectedIdx = 1
+-- Sentinel: returned by getContextActionForModifier when the user explicitly
+-- set a modifier to "none" (disabled). Truthy so callers can distinguish it
+-- from nil (= "no match found, try built-in fallback").
+local CTX_DISABLED   = {}
+
 -- Forward declarations
 local selectRow, showDescription, updateScrollBar
+local openContextMenu, closeContextMenu, selectCtxRow, activateCtxAction
+local getContextActionForModifier
 
 -- Shared backdrop helper — border only, background handled by a separate texture
 local BACKDROP       = { edgeFile = "Interface/Buttons/WHITE8X8", edgeSize = 1 }
@@ -257,37 +275,67 @@ for i = 1, MAX_RESULTS do
 
     local rowIndex = i
     row:SetScript("OnEnter", function(self)
-        if self.entry then selectRow(rowIndex) end
+        if self.entry then
+            selectRow(rowIndex)
+            -- If context menu is open, switch it to this entry
+            if ctxMenuOpen and ctxEntry ~= self.entry then
+                openContextMenu(self.entry)
+            end
+        end
     end)
 
-    row:SetScript("OnClick", function(self)
-        if self.entry then
-            if self.entry._insertText then
-                editBox:SetText(self.entry._insertText)
-                editBox:SetFocus()
-                return
+    row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    row:SetScript("OnClick", function(self, button)
+        if not self.entry then return end
+        if button == "RightButton" then
+            if ctxMenuOpen then
+                closeContextMenu()
+            else
+                selectRow(rowIndex)
+                openContextMenu(self.entry)
             end
-            if IsShiftKeyDown() and self.entry.onShiftActivate then
-                frame:Hide()
-                self.entry.onShiftActivate()
-                return
-            end
-            if IsControlKeyDown() and self.entry.onCtrlActivate then
-                local keepOpen = type(self.entry.ctrlKeepsOpen) == "function" and self.entry.ctrlKeepsOpen() or
-                self.entry.ctrlKeepsOpen
-                if not keepOpen then frame:Hide() end
-                self.entry.onCtrlActivate()
-                return
-            end
-            if IsAltKeyDown() and self.entry.onAltActivate then
-                frame:Hide()
-                self.entry.onAltActivate()
-                return
-            end
-            Brannfred.AddToHistory(self.entry)
-            if self.entry.onActivate then self.entry.onActivate() end
+            return
         end
-        frame:Hide()
+        if self.entry._insertText then
+            editBox:SetText(self.entry._insertText)
+            editBox:SetFocus()
+            return
+        end
+        if IsShiftKeyDown() then
+            local action = getContextActionForModifier(self.entry, "shift")
+            if action and action ~= CTX_DISABLED then
+                Brannfred.AddToHistory(self.entry)
+                if not action.keepOpen then frame:Hide() end
+                action.func()
+                return
+            end
+        end
+        if IsControlKeyDown() then
+            local action = getContextActionForModifier(self.entry, "ctrl")
+            if action and action ~= CTX_DISABLED then
+                Brannfred.AddToHistory(self.entry)
+                if not action.keepOpen then frame:Hide() end
+                action.func()
+                return
+            end
+        end
+        if IsAltKeyDown() then
+            local action = getContextActionForModifier(self.entry, "alt")
+            if action and action ~= CTX_DISABLED then
+                Brannfred.AddToHistory(self.entry)
+                if not action.keepOpen then frame:Hide() end
+                action.func()
+                return
+            end
+        end
+        local primaryAction = getContextActionForModifier(self.entry, "primary")
+        Brannfred.AddToHistory(self.entry)
+        if primaryAction and primaryAction ~= CTX_DISABLED then
+            if not primaryAction.keepOpen then frame:Hide() end
+            primaryAction.func()
+        else
+            frame:Hide()
+        end
     end)
 
     row:RegisterForDrag("LeftButton")
@@ -304,6 +352,188 @@ for i = 1, MAX_RESULTS do
     end)
 
     rows[i] = row
+end
+
+-- ── Context Menu ──────────────────────────────────────────────────────────────
+local ctxFrame = CreateFrame("Frame", "BrannfredCtxFrame", frame, "BackdropTemplate")
+ctxFrame:SetWidth(CTX_WIDTH)
+ctxFrame:SetFrameStrata("HIGH")
+applyBackdrop(ctxFrame)
+local ctxBg = ctxFrame:CreateTexture(nil, "BACKGROUND")
+ctxBg:SetColorTexture(0.07, 0.07, 0.07, 0.93)
+ctxBg:SetPoint("TOPLEFT", ctxFrame, "TOPLEFT", 1, -1)
+ctxBg:SetPoint("BOTTOMRIGHT", ctxFrame, "BOTTOMRIGHT", -1, 1)
+ctxFrame:Hide()
+
+local ctxHeader = ctxFrame:CreateFontString(nil, "OVERLAY")
+ctxHeader:SetFont(main_font, 11, "")
+ctxHeader:SetTextColor(0.55, 0.55, 0.55, 1)
+ctxHeader:SetPoint("TOPLEFT", ctxFrame, "TOPLEFT", 8, -8)
+ctxHeader:SetPoint("TOPRIGHT", ctxFrame, "TOPRIGHT", -8, -8)
+ctxHeader:SetHeight(CTX_HEADER_H - 10)
+ctxHeader:SetJustifyH("LEFT")
+ctxHeader:SetWordWrap(false)
+
+local ctxSep = ctxFrame:CreateTexture(nil, "BACKGROUND")
+ctxSep:SetHeight(1)
+ctxSep:SetColorTexture(0.3, 0.3, 0.3, 1)
+ctxSep:SetPoint("TOPLEFT", ctxFrame, "TOPLEFT", 1, -CTX_HEADER_H)
+ctxSep:SetPoint("TOPRIGHT", ctxFrame, "TOPRIGHT", -1, -CTX_HEADER_H)
+
+local ctxRows = {}
+for i = 1, MAX_CTX_ROWS do
+    local row = CreateFrame("Button", nil, ctxFrame)
+    row:SetHeight(CTX_ROW_HEIGHT)
+    row:SetPoint("TOPLEFT", ctxFrame, "TOPLEFT", 1, -(CTX_HEADER_H + 1 + (i - 1) * CTX_ROW_HEIGHT))
+    row:SetPoint("TOPRIGHT", ctxFrame, "TOPRIGHT", -1, -(CTX_HEADER_H + 1 + (i - 1) * CTX_ROW_HEIGHT))
+
+    local sel = row:CreateTexture(nil, "BACKGROUND")
+    sel:SetAllPoints()
+    sel:SetColorTexture(0.2, 0.6, 1, 0.18)
+    sel:Hide()
+    row.selTex = sel
+
+    local numText = row:CreateFontString(nil, "OVERLAY")
+    numText:SetFont(main_font, 10, "")
+    numText:SetTextColor(0.45, 0.45, 0.45, 1)
+    numText:SetPoint("LEFT", row, "LEFT", 6, 0)
+    numText:SetWidth(14)
+    numText:SetJustifyH("LEFT")
+    numText:SetText(i < MAX_CTX_ROWS and tostring(i) or "0")
+    row.numText = numText
+
+    local hintText = row:CreateFontString(nil, "OVERLAY")
+    hintText:SetFont(main_font, 10, "")
+    hintText:SetTextColor(0.45, 0.45, 0.45, 1)
+    hintText:SetPoint("RIGHT", row, "RIGHT", -6, 0)
+    hintText:SetWidth(30)
+    hintText:SetJustifyH("RIGHT")
+    row.hintText = hintText
+
+    local text = row:CreateFontString(nil, "OVERLAY")
+    text:SetFont(main_font, 12, "")
+    text:SetTextColor(0.9, 0.9, 0.9, 1)
+    text:SetPoint("LEFT", numText, "RIGHT", 4, 0)
+    text:SetPoint("RIGHT", hintText, "LEFT", -4, 0)
+    text:SetJustifyH("LEFT")
+    row.text = text
+
+    local idx = i
+    row:SetScript("OnEnter", function() selectCtxRow(idx) end)
+    row:RegisterForClicks("LeftButtonUp")
+    row:SetScript("OnClick", function() activateCtxAction(idx) end)
+
+    ctxRows[i] = row
+end
+
+-- ── Context menu functions ────────────────────────────────────────────────────
+getContextActionForModifier = function(entry, modifier)
+    if not entry or not entry.context_actions then return nil end
+    local providerType = entry._originalType or entry.type
+    local key          = "provmod_" .. providerType .. "_" .. modifier
+    local saved        = Brannfred.db and Brannfred.db.profile[key]
+
+    -- Explicit "none" = user disabled this modifier; skip built-in fallback too.
+    if saved == "none" then return CTX_DISABLED end
+
+    -- Ignore legacy "default" sentinel from old saves.
+    local overrideName = (saved and saved ~= "default") and saved or nil
+    if overrideName then
+        for _, action in ipairs(entry.context_actions) do
+            if action.name == overrideName then return action end
+        end
+    end
+    -- Search for action with matching modifier (including "primary")
+    for _, action in ipairs(entry.context_actions) do
+        if action.modifier == modifier then return action end
+    end
+    return nil
+end
+
+selectCtxRow = function(index)
+    ctxSelectedIdx = index
+    for i = 1, MAX_CTX_ROWS do
+        ctxRows[i].selTex:SetShown(i == index)
+    end
+end
+
+activateCtxAction = function(index)
+    local action = ctxActions[index]
+    if not action then return end
+    local entry    = ctxEntry
+    local keepOpen = action.keepOpen
+    Brannfred.AddToHistory(entry)
+    closeContextMenu()
+    if not keepOpen then frame:Hide() end
+    action.func()
+end
+
+openContextMenu = function(entry)
+    if not entry then return end
+
+    -- Use context_actions from the entry; all entries must have context_actions
+    local actions = entry.context_actions
+    if not actions or #actions == 0 then
+        return
+    end
+
+    ctxMenuOpen        = true
+    ctxEntry           = entry
+    ctxActions         = actions
+    ctxSelectedIdx     = 1
+
+    local providerType = entry._originalType or entry.type
+
+    -- Build actionName → modifier hint string (user overrides take priority)
+    local HINTS        = { primary = "[En]", shift = "[Sh]", ctrl = "[Ct]", alt = "[Al]" }
+    local hintMap      = {}
+    local profile      = Brannfred.db and Brannfred.db.profile
+    for _, mod in ipairs({ "primary", "shift", "ctrl", "alt" }) do
+        local overrideName = profile and profile["provmod_" .. providerType .. "_" .. mod]
+        if overrideName and overrideName ~= "default" and HINTS[mod] then
+            hintMap[overrideName] = HINTS[mod]
+        end
+    end
+    -- Show [En] hint for the primary action (first context_action)
+    if #actions > 0 then
+        hintMap[actions[1].name] = "[En]"
+    end
+    for _, action in ipairs(actions) do
+        if action.modifier and HINTS[action.modifier] and not hintMap[action.name] then
+            local overrideName = profile and profile["provmod_" .. providerType .. "_" .. action.modifier]
+            if not overrideName or overrideName == "default" then
+                hintMap[action.name] = HINTS[action.modifier]
+            end
+        end
+    end
+
+    ctxHeader:SetText(entry.name)
+
+    local count = math.min(#ctxActions, MAX_CTX_ROWS)
+    for i = 1, MAX_CTX_ROWS do
+        local action = ctxActions[i]
+        if action then
+            ctxRows[i].text:SetText(action.name)
+            ctxRows[i].hintText:SetText(hintMap[action.name] or "")
+            ctxRows[i].selTex:Hide()
+            ctxRows[i]:Show()
+        else
+            ctxRows[i]:Hide()
+        end
+    end
+
+    ctxFrame:SetHeight(CTX_HEADER_H + 1 + count * CTX_ROW_HEIGHT + 2)
+    ctxFrame:ClearAllPoints()
+    ctxFrame:SetPoint("TOPLEFT", resultsFrame, "TOPRIGHT", 2, 0)
+    ctxFrame:Show()
+    selectCtxRow(1)
+end
+
+closeContextMenu = function()
+    ctxMenuOpen = false
+    ctxEntry    = nil
+    ctxActions  = {}
+    ctxFrame:Hide()
 end
 
 -- ── showDescription ───────────────────────────────────────────────────────────
@@ -367,6 +597,7 @@ end
 
 -- ── updateResults ─────────────────────────────────────────────────────────────
 local function updateResults(query)
+    closeContextMenu()
     for i = 1, MAX_RESULTS do rows[i]:Hide() end
 
     if query:match("^%s*$") then
@@ -425,42 +656,96 @@ editBox:SetScript("OnTextChanged", function(self)
 end)
 
 editBox:SetScript("OnKeyDown", function(self, key)
+    -- ── Context menu mode ────────────────────────────────────────────────────
+    if ctxMenuOpen then
+        self:SetPropagateKeyboardInput(false)
+        if key == "ESCAPE" or key == "TAB" then
+            closeContextMenu()
+        elseif key == "UP" then
+            local count = math.min(#ctxActions, MAX_CTX_ROWS)
+            selectCtxRow(ctxSelectedIdx > 1 and ctxSelectedIdx - 1 or count)
+        elseif key == "DOWN" then
+            local count = math.min(#ctxActions, MAX_CTX_ROWS)
+            selectCtxRow(ctxSelectedIdx < count and ctxSelectedIdx + 1 or 1)
+        elseif key == "ENTER" then
+            activateCtxAction(ctxSelectedIdx)
+        else
+            local numStr = key:match("^(%d)$")
+            if numStr then
+                local num = tonumber(numStr)
+                local idx = num == 0 and MAX_CTX_ROWS or num
+                if ctxActions[idx] then activateCtxAction(idx) end
+            end
+        end
+        return
+    end
+
+    -- ── Normal mode ──────────────────────────────────────────────────────────
     if key == "ENTER" then
         local selected = currentResults[selectedIndex]
         if selected then
-            if selected.entry._insertText then
-                editBox:SetText(selected.entry._insertText)
+            local entry = selected.entry
+            if entry._insertText then
+                editBox:SetText(entry._insertText)
                 editBox:SetFocus()
                 self:SetPropagateKeyboardInput(false)
                 return
             end
-            if IsShiftKeyDown() and selected.entry.onShiftActivate then
+            if IsShiftKeyDown() then
+                local action = getContextActionForModifier(entry, "shift")
+                if action and action ~= CTX_DISABLED then
+                    Brannfred.AddToHistory(entry)
+                    if not action.keepOpen then frame:Hide() end
+                    action.func()
+                    self:SetPropagateKeyboardInput(false)
+                    return
+                end
+            end
+            if IsControlKeyDown() then
+                local action = getContextActionForModifier(entry, "ctrl")
+                if action and action ~= CTX_DISABLED then
+                    Brannfred.AddToHistory(entry)
+                    if not action.keepOpen then frame:Hide() end
+                    action.func()
+                    self:SetPropagateKeyboardInput(false)
+                    return
+                end
+            end
+            if IsAltKeyDown() then
+                local action = getContextActionForModifier(entry, "alt")
+                if action and action ~= CTX_DISABLED then
+                    Brannfred.AddToHistory(entry)
+                    if not action.keepOpen then frame:Hide() end
+                    action.func()
+                    self:SetPropagateKeyboardInput(false)
+                    return
+                end
+            end
+            local primaryAction = getContextActionForModifier(entry, "primary")
+            Brannfred.AddToHistory(entry)
+            if primaryAction and primaryAction ~= CTX_DISABLED then
+                if not primaryAction.keepOpen then frame:Hide() end
+                primaryAction.func()
+            else
                 frame:Hide()
-                selected.entry.onShiftActivate()
-                self:SetPropagateKeyboardInput(false)
-                return
             end
-            if IsControlKeyDown() and selected.entry.onCtrlActivate then
-                local keepOpen = type(selected.entry.ctrlKeepsOpen) == "function" and selected.entry.ctrlKeepsOpen() or
-                selected.entry.ctrlKeepsOpen
-                if not keepOpen then frame:Hide() end
-                selected.entry.onCtrlActivate()
-                self:SetPropagateKeyboardInput(false)
-                return
-            end
-            if IsAltKeyDown() and selected.entry.onAltActivate then
-                frame:Hide()
-                selected.entry.onAltActivate()
-                self:SetPropagateKeyboardInput(false)
-                return
-            end
-            Brannfred.AddToHistory(selected.entry)
-            if selected.entry.onActivate then selected.entry.onActivate() end
+        else
+            frame:Hide()
         end
-        frame:Hide()
         self:SetPropagateKeyboardInput(false)
         return
     end
+
+    -- Tab opens the context menu for the currently selected result
+    if key == "TAB" and resultsFrame:IsShown() and #currentResults > 0 then
+        local selected = currentResults[selectedIndex]
+        if selected then
+            openContextMenu(selected.entry)
+        end
+        self:SetPropagateKeyboardInput(false)
+        return
+    end
+
     if resultsFrame:IsShown() then
         if key == "UP" then
             local count = math.min(#currentResults, MAX_RESULTS)
@@ -482,7 +767,11 @@ editBox:SetScript("OnKeyDown", function(self, key)
 end)
 
 editBox:SetScript("OnEscapePressed", function()
-    frame:Hide()
+    if ctxMenuOpen then
+        closeContextMenu()
+    else
+        frame:Hide()
+    end
 end)
 
 editBox:EnableMouseWheel(true)
@@ -497,6 +786,7 @@ end)
 
 
 frame:SetScript("OnHide", function()
+    closeContextMenu()
     resultsFrame:Hide()
     descFrame:Hide()
     scrollFrame:SetVerticalScroll(0)
@@ -508,11 +798,11 @@ end)
 -- opaque border pixels.  Used to position the bg texture so it meets the visible
 -- inner edge of the border (and not the transparent inner area of the 9-slice).
 local TEXTURE_INSET_RATIO = {
-    ["Interface/Buttons/WHITE8X8"]                     = 1.0,      -- solid: full edgeSize
-    ["Interface/Tooltips/UI-Tooltip-Border"]           = 5 / 16,   -- native inset=5, size=16
-    ["Interface/DialogFrame/UI-DialogBox-Border"]      = 11 / 32,  -- native inset=11, size=32
+    ["Interface/Buttons/WHITE8X8"]                     = 1.0,     -- solid: full edgeSize
+    ["Interface/Tooltips/UI-Tooltip-Border"]           = 5 / 16,  -- native inset=5, size=16
+    ["Interface/DialogFrame/UI-DialogBox-Border"]      = 11 / 32, -- native inset=11, size=32
     ["Interface/DialogFrame/UI-DialogBox-Gold-Border"] = 11 / 32,
-    ["Interface/FriendsFrame/UI-Toast-Border"]         = 4 / 12,   -- native inset=4, size=12
+    ["Interface/FriendsFrame/UI-Toast-Border"]         = 4 / 12,  -- native inset=4, size=12
 }
 
 local function bgInset(btex, bs)
@@ -549,6 +839,14 @@ function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-s
     descStats:SetFont(fpath, math.max(6, fsize - 2), "")
     descText:SetFont(fpath, math.max(6, fsize - 1), "")
 
+    -- Context menu fonts
+    ctxHeader:SetFont(fpath, math.max(6, fsize - 2), "")
+    for _, row in ipairs(ctxRows) do
+        row.text:SetFont(fpath, fsize, "")
+        row.numText:SetFont(fpath, math.max(6, fsize - 3), "")
+        row.hintText:SetFont(fpath, math.max(6, fsize - 3), "")
+    end
+
     -- Visible rows + content padding
     VISIBLE_ROWS             = p.visibleRows or 10
     CONTENT_PAD              = p.contentPadding or (p.borderSize or 1)
@@ -566,14 +864,14 @@ function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-s
     -- Background textures: inset by the VISUAL border width (not full edgeSize)
     -- so the bg meets the visible inner edge of the border without a gap.
     local bgi                = bgInset(btex, bs)
-    for _, bg in ipairs({ frameBg, resultsBg, descBg }) do
+    for _, bg in ipairs({ frameBg, resultsBg, descBg, ctxBg }) do
         bg:ClearAllPoints()
         bg:SetPoint("TOPLEFT", bg:GetParent(), "TOPLEFT", bgi, -bgi)
         bg:SetPoint("BOTTOMRIGHT", bg:GetParent(), "BOTTOMRIGHT", -bgi, bgi)
         bg:SetColorTexture(bgr, bgg, bgb, bga)
     end
 
-    for _, f in ipairs({ frame, resultsFrame, descFrame }) do
+    for _, f in ipairs({ frame, resultsFrame, descFrame, ctxFrame }) do
         f:SetBackdrop(bd)
         f:SetBackdropBorderColor(bdr, bdg, bdb, bda)
     end
@@ -608,7 +906,7 @@ function Brannfred.ApplyFrameSettings() ---@diagnostic disable-line: duplicate-s
     sep:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -cp, -(cp + ii + 48 + ii))
 
     descText:ClearAllPoints()
-    descText:SetPoint("TOPLEFT",  descFrame, "TOPLEFT",  cp + ii, -(cp + ii + 48 + ii + 8))
+    descText:SetPoint("TOPLEFT", descFrame, "TOPLEFT", cp + ii, -(cp + ii + 48 + ii + 8))
     descText:SetPoint("TOPRIGHT", descFrame, "TOPRIGHT", -(cp + ii), -(cp + ii + 48 + ii + 8))
     descText:SetWidth(w - (cp + ii) * 2)
 

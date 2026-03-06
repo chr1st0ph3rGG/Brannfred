@@ -3,6 +3,9 @@ if not L then return end
 
 L["Spellbook"]                                              = "Zauberbuch"
 L["Spells"]                                                 = "Zauber"
+L["Cast"]                                                   = "Wirken"
+L["Open profession"]                                        = "Beruf öffnen"
+L["Link in Chat"]                                           = "Im Chat verlinken"
 L["Show all spell ranks"]                                   = "Alle Zauberränge anzeigen"
 L["Show all skill ranks instead of only the highest"]       = "Alle Fertigkeitsstufen anzeigen statt nur die höchste"
 L["Close frame on drag"]                                    = "Fenster beim Ziehen schließen"

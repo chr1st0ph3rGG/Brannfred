@@ -33,7 +33,7 @@ function EquipSetsProvider:OnEnable()
 
     for _, name in ipairs(names) do
         local set = ItemRackUser.Sets[name]
-        local setName = name  -- upvalue for closures
+        local setName = name -- upvalue for closures
 
         local slotCount = 0
         if set.equip then
@@ -55,11 +55,17 @@ function EquipSetsProvider:OnEnable()
             return slotCount > 0 and (slotCount .. " slots") or ""
         end
 
-        entry.onActivate = function()
-            if not InCombatLockdown() and isItemRackAvailable() then
-                ItemRack.EquipSet(setName)
-            end
-        end
+        entry.context_actions = {
+            {
+                name     = L["Equip set"],
+                func     = function()
+                    if not InCombatLockdown() and isItemRackAvailable() then
+                        ItemRack.EquipSet(setName)
+                    end
+                end,
+                modifier = "primary",
+            },
+        }
 
         self.entries[#self.entries + 1] = entry
     end

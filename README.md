@@ -3,11 +3,11 @@
 [![Github Repository](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/chr1st0ph3rGG/Brannfred)
 [![CurseForge Downloads](https://img.shields.io/curseforge/dt/1473403)](https://www.curseforge.com/wow/addons/brannfred)
 
-Brannfred brings a spotlight-style search bar to WoW Anniversary. One keybind opens a floating input where you can fuzzy-search spells, quests, inventory, items, equipment sets, and more — all from a single place, without knowing where to look first.
+Brannfred brings a spotlight-style search bar to WoW Classic TBC Anniversary/Era/Hardcore/SoD and Classic MoP. One keybind opens a floating input where you can fuzzy-search spells, quests, inventory, items, equipment sets, and more — all from a single place, without knowing where to look first.
 
 Use a bang prefix (e.g. `!s` or `!spell`) to narrow results to a specific source. Other addons can register their own data sources via the provider API.
 
-> **Note:** Currently targets WoW Anniversary only. Porting to other versions is not planned but may be considered if there is enough interest.
+> **Note:** Currently targets WoW Classic Editions only. Porting to Retail version is not planned but may be considered if there is enough interest.
 
 The Brannfred Frame is completely customizable; you can change border, colors, and font in the Brannfred Settings. Additionally, all icons can be styled with Masque.
 
@@ -15,13 +15,46 @@ The Brannfred Frame is completely customizable; you can change border, colors, a
 
 There are three ways to open the search bar:
 
-- **Keybind** — Open the Brannfred settings and click the **"Toggle Brannfred search"** button in the *Key binding* section. This is the recommended way.
+- **Keybind** — Open the Brannfred settings and click the **"Toggle Brannfred search"** button in the _Key binding_ section. This is the recommended way.
 - **Slash commands** — Type `/brannfred` or `/bfrd` in chat to toggle the frame.
 - **Minimap icon** — Left-click the Brannfred minimap button.
 
+## Using Context Menus
+
+Every result in Brannfred can have **multiple actions** tied to it. You can trigger different actions using:
+
+- **Primary action (default)** — Press `Enter`, left-click on a result, or click the first action in the context menu. This is the most common thing you want to do with an item.
+
+- **Modifier-based actions** — Hold a modifier key while pressing `Enter` or clicking in the Results menu without the Context Menu open:
+  - **`Shift-Enter`** or **`Shift-Click`** — secondary action
+  - **`Ctrl-Enter`** or **`Ctrl-Click`** — tertiary action
+  - **`Alt-Enter`** or **`Alt-Click`** — rare action
+
+- **Context menu** — **Right-click** on any result or use `TAB` to open or close a context menu for a search result entry showing **all available actions** with their modifier hints:
+
+  ```
+  1. Show in Bags  [En]          ← Press 1 or click or press Enter
+  2. Use / Equip   [En]          ← Press 2 or click
+  3. Link in Chat  [Sh]          ← Press 3 or Shift-Click or press Shift-Enter
+  ```
+
+  In the context menu you can:
+  - **Click on any action** to trigger it
+  - **Press the number** (1, 2, 3…) to trigger that action. Up to 10 actions can be called via numbers.
+  - **Use arrow keys** to navigate and `Enter` to select
+  - **Press `TAB`** or right-click again to close the context menu
+
+  In the addon options you can decide which action is using which modifier key or disable it.
+
+**Real example:** You search for an item in your inventory (e.g. "Healing Potion"):
+
+- Press `Enter` → shows the item in your bags and highlights it (primary action)
+- Hold `Shift` and press `Enter` → links the item in chat (secondary action)
+- Right-click the result → opens context menu showing all available actions
+
 ## Modules
 
-Brannfred comes with a bunch of powerful modules from the get-go
+Brannfred comes with a bunch of powerful modules from the get-go. The provided modifier keys are the default modifiers and can be swapped via the addon options.
 
 ### Spellbook
 
@@ -29,9 +62,13 @@ Brannfred comes with a bunch of powerful modules from the get-go
 
 Simple search inside your Spellbook. Trade skills (i.e. opening any of the crafting menus) can be opened directly from Brannfred. Skills and so on can be dragged into your Action Bars.
 
-- **`Enter`** — casts the spell (profession/trade skills only; combat spells cannot be cast from the search bar).
+**Actions:**
+
+- **`Enter` or left-click `[En]`** — casts the spell (profession/trade skills only; combat spells cannot be cast from the search bar).
 - **Drag** — picks up the spell so you can drop it onto an Action Bar slot.
 - **Hover over icon** — shows the full spell tooltip including cast time, range, cost, and cooldown.
+
+**Tip:** Right-click on a spell to open the context menu and see all available actions with their modifier keys.
 
 ### Inventory
 
@@ -41,14 +78,15 @@ This Module requires the Syndicator Addon to be installed. Simply search within 
 
 Item names are coloured by quality (grey / white / green / blue / purple / orange).
 
-The click behaviour for equippable and consumable items is configurable in the Inventory options:
+**Actions:**
 
-- **Mode "Show in bags on click" (default):** `Enter` opens your bags and highlights the item; `Ctrl-Enter` uses or equips the item directly.
-- **Mode "Use / equip on click":** `Enter` uses or equips the item directly; `Ctrl-Enter` opens your bags and highlights it instead. Non-usable items always open the bags regardless of mode.
-
-- **`Shift-Enter`** — inserts the item link into the active chat input.
+- **`Enter` or left-click `[En]`** — shows the item in your bags (or uses/equips it; configurable in Inventory options).
+- **`Ctrl-Enter` or `Ctrl-Click` `[Ct]`** — toggles the secondary action (by default, uses/equips the item if the primary is "show in bags").
+- **`Shift-Enter` or `Shift-Click` `[Sh]`** — inserts the item link into the active chat input.
 - **Drag** — picks up the item so you can move it or link it.
 - **Hover over icon** — shows the full item tooltip.
+
+**Tip:** The primary action (Enter) is configurable in the Inventory options. You can swap between "Show in Bags" and "Use / Equip" as the primary action.
 
 ### Quests
 
@@ -58,21 +96,25 @@ This Module requires the Questie Addon. It lets you search your quest log.
 
 Quest names are coloured by level difficulty relative to your character (red / orange / yellow / green / grey). Completed quests show a light-green **(Completed)** suffix; failed quests have their icon tinted red.
 
-- **`Enter`** — opens the quest in your Quest Log.
-- **`Shift-Enter`** — posts a quest link in chat.
-- **`Ctrl-Enter`** — opens the World Map and navigates to the nearest objective or turn-in NPC.
-- **`Alt-Enter`** — sets a TomTom waypoint to the nearest objective or turn-in (TomTom is not required, but this action does nothing without it).
+**Actions:**
+
+- **`Enter` or left-click `[En]`** — opens the quest in your Quest Log.
+- **`Shift-Enter` or `Shift-Click` `[Sh]`** — posts a quest link in chat.
+- **`Ctrl-Enter` or `Ctrl-Click` `[Ct]`** — opens the World Map and navigates to the nearest objective or turn-in NPC.
+- **`Alt-Enter` or `Alt-Click` `[Al]`** — sets a TomTom waypoint to the nearest objective or turn-in (TomTom is not required, but this action does nothing without it).
 
 ### Item Database
 
 **Prefix:** `!idb` or `!itemdb`
 
-Search for items you don't currently own. Item names are coloured by quality (grey / white / green / blue / purple / orange) and the meta column shows the item sub-type (e.g. *Sword*, *Cloth*, *Potion*).
+Search for items you don't currently own. Item names are coloured by quality (grey / white / green / blue / purple / orange) and the meta column shows the item sub-type (e.g. _Sword_, _Cloth_, _Potion_).
 
 Requires the **Ludwig** addon. Its pre-built database (~15 000+ items) is available immediately from the first search.
 
-- **`Shift-Enter`** — inserts the item link into the active chat input.
-- **`Ctrl-Enter`** — opens the Dressing Room for equippable items.
+**Actions:**
+
+- **`Shift-Enter` or `Shift-Click` `[Sh]`** — inserts the item link into the active chat input.
+- **`Ctrl-Enter` or `Ctrl-Click` `[Ct]`** — opens the Dressing Room for equippable items.
 - **Hover over icon** — shows the full item tooltip.
 
 ### Calculator
@@ -122,8 +164,10 @@ Use `!bnet` / `!bn` to show only Battle.net friends, or `!friend` / `!fr` for in
 
 Lists all your friends sorted by priority: in-game online friends appear first, followed by Battle.net online friends (e.g. playing another game), and offline friends always at the bottom. Online friends are shown in green, offline in grey.
 
-- **`Enter`** — pre-fills the chat box with `/w <name>` so you can start typing immediately.
-- **`Shift-Enter`** — invites the friend to your party (only works when they are actively in-game).
+**Actions:**
+
+- **`Enter` or left-click `[En]`** — pre-fills the chat box with `/w <name>` so you can start typing immediately.
+- **`Shift-Enter` or `Shift-Click` `[Sh]`** — invites the friend to your party (only works when they are actively in-game).
 
 **Battle.net friends:** when the friend is playing WoW, their character name is shown with the BattleTag appended in blue parentheses (e.g. `Friedbert (John#1234)`). When online but not in WoW, only the BattleTag or Real ID name is shown. The meta column shows AFK, DND, Online, or Offline status.
 
@@ -135,7 +179,11 @@ The detail panel shows class, current zone, and any friend note you have set.
 
 **Prefix:** `!eq`, `!equip`, `!set`, or `!gear`
 
-Requires the ItemRack addon. Lists all your saved equipment sets. `Enter` equips the selected set. The meta column shows `[active]` for the currently worn set, or the number of item slots the set defines.
+Requires the ItemRack addon. Lists all your saved equipment sets. The meta column shows `[active]` for the currently worn set, or the number of item slots the set defines.
+
+**Actions:**
+
+- **`Enter` or left-click `[En]`** — equips the selected set.
 
 ## Provider API
 
@@ -162,7 +210,13 @@ function MyProvider:OnEnable()
         type       = "mytype",           -- must match provider.type
         color      = self.color,
         labelColor = self.labelColor,
-        onActivate = function() print("activated!") end,
+        context_actions = {
+            {
+                name     = "My Action",
+                func     = function() print("activated!") end,
+                modifier = "primary",   -- primary action (Enter / click)
+            },
+        },
     }
 end
 
@@ -171,16 +225,16 @@ Brannfred:RegisterProvider(MyProvider)
 
 ### Provider fields
 
-| Field            | Required | Description                                                                    |
-| ---------------- | -------- | ------------------------------------------------------------------------------ |
-| `type`           | yes      | Unique identifier string. Used for `!prefix` filtering.                        |
-| `label`          | yes      | Human-readable name shown in the type-label column.                            |
-| `aliases`        | —        | Additional bang-prefix strings (e.g. `{ "s", "spell" }`).                      |
-| `providerIcon`   | —        | Icon shown in the `!` autocomplete list. Falls back to the first entry's icon. |
-| `color`          | —        | Default `{r,g,b}` for entry name text.                                         |
-| `labelColor`     | —        | Default `{r,g,b}` for the type label column.                                   |
-| `entries`        | —        | Flat list of entry tables. Populated in `OnEnable` or `onQuery`.               |
-| `OnEnable()`     | —        | Called when Brannfred enables. Build `self.entries` here.                      |
+| Field                  | Required | Description                                                                                     |
+| ---------------------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `type`                 | yes      | Unique identifier string. Used for `!prefix` filtering.                                         |
+| `label`                | yes      | Human-readable name shown in the type-label column.                                             |
+| `aliases`              | —        | Additional bang-prefix strings (e.g. `{ "s", "spell" }`).                                       |
+| `providerIcon`         | —        | Icon shown in the `!` autocomplete list. Falls back to the first entry's icon.                  |
+| `color`                | —        | Default `{r,g,b}` for entry name text.                                                          |
+| `labelColor`           | —        | Default `{r,g,b}` for the type label column.                                                    |
+| `entries`              | —        | Flat list of entry tables. Populated in `OnEnable` or `onQuery`.                                |
+| `OnEnable()`           | —        | Called when Brannfred enables. Build `self.entries` here.                                       |
 | `prefixOnly`           | —        | `true` → excluded from global (unprefixed) search.                                              |
 | `preserveOrder`        | —        | `true` → Search does not re-sort entries; the provider is responsible for ordering them itself. |
 | `hideFromAutocomplete` | —        | `true` → provider is hidden from the `!` autocomplete list but still reachable via its aliases. |
@@ -188,26 +242,158 @@ Brannfred:RegisterProvider(MyProvider)
 
 ### Entry fields
 
-| Field               | Required | Description                                                                |
-| ------------------- | -------- | -------------------------------------------------------------------------- |
-| `name`              | yes      | Display name and default fuzzy-match target.                               |
-| `icon`              | yes      | Texture path or FileDataID.                                                |
-| `type`              | yes      | Must equal `provider.type`.                                                |
-| `color`             | —        | `{r,g,b}` override for the entry name text.                                |
-| `iconColor`         | —        | `{r,g,b}` tint applied to the entry icon via `SetVertexColor` (e.g. red for failed quests). Defaults to white (no tint). |
-| `labelColor`        | —        | `{r,g,b}` override for the type label.                                     |
-| `searchName`        | —        | Alternative string used for fuzzy matching (e.g. `"Fireball Rank 5"`).     |
-| `getMeta()`         | —        | Returns a short string for the meta column (color escape codes supported). |
-| `getStats()`        | —        | Returns a one-line stat string shown in the description panel header.      |
-| `getDesc()`         | —        | Returns a longer description shown below the separator line.               |
-| `onActivate()`      | —        | Called on `Enter` or left-click.                                           |
-| `onDrag()`          | —        | Called when the row is dragged (e.g. `PickupSpellBookItem`).               |
-| `onShiftActivate()` | —        | Called on `Shift-Enter`.                                                                                                                                          |
-| `onCtrlActivate()`  | —        | Called on `Ctrl-Enter`. The frame closes afterwards unless `ctrlKeepsOpen` is set.                                                                                |
-| `onAltActivate()`   | —        | Called on `Alt-Enter`.                                                                                                                                            |
-| `ctrlKeepsOpen`     | —        | `true` or a function returning a boolean. When truthy the search frame stays open after `onCtrlActivate` fires. Use a function to read a live DB setting.         |
-| `onIconTooltip(anchor)` | —    | Called when the cursor enters the entry's icon (both in the result rows and the description panel). `anchor` is the icon button frame. Show a `GameTooltip` here. |
-| `_noPreview`        | —        | `true` → suppresses the description panel for this entry.                                                                                                         |
+| Field                   | Required | Description                                                                                                                                                       |
+| ----------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------ | ---------------------------------------------------- |
+| `name`                  | yes      | Display name and default fuzzy-match target.                                                                                                                      |
+| `icon`                  | yes      | Texture path or FileDataID.                                                                                                                                       |
+| `type`                  | yes      | Must equal `provider.type`.                                                                                                                                       |
+| `color`                 | —        | `{r,g,b}` override for the entry name text.                                                                                                                       |
+| `iconColor`             | —        | `{r,g,b}` tint applied to the entry icon via `SetVertexColor` (e.g. red for failed quests). Defaults to white (no tint).                                          |
+| `labelColor`            | —        | `{r,g,b}` override for the type label.                                                                                                                            |
+| `searchName`            | —        | Alternative string used for fuzzy matching (e.g. `"Fireball Rank 5"`).                                                                                            |
+| `getMeta()`             | —        | Returns a short string for the meta column (color escape codes supported).                                                                                        |
+| `getStats()`            | —        | Returns a one-line stat string shown in the description panel header.                                                                                             |
+| `getDesc()`             | —        | Returns a longer description shown below the separator line.                                                                                                      |
+| `context_actions`       | yes      | Array of action tables with `{ name = "...", func = function() ... end, modifier = "primary"                                                                      | "shift" | "ctrl" | "alt" }`. Triggered by Enter/click or modifier keys. |
+| `onDrag()`              | —        | Called when the row is dragged (e.g. `PickupSpellBookItem`).                                                                                                      |
+| `onIconTooltip(anchor)` | —        | Called when the cursor enters the entry's icon (both in the result rows and the description panel). `anchor` is the icon button frame. Show a `GameTooltip` here. |
+| `_noPreview`            | —        | `true` → suppresses the description panel for this entry.                                                                                                         |
+
+### Understanding context_actions
+
+Every entry must define one or more actions via the **`context_actions`** array. Each action in the array is a table with the following structure:
+
+```lua
+{
+    name     = "Action Display Name",           -- shown in the context menu
+    func     = function() /* do something */ end, -- called when the action is triggered
+    modifier = "primary",                       -- "primary", "shift", "ctrl", "alt", or nil
+}
+```
+
+#### Modifiers
+
+The `modifier` field determines **when** an action is triggered:
+
+| Modifier    | Trigger                            | Hint   | Example                                              |
+| ----------- | ---------------------------------- | ------ | ---------------------------------------------------- |
+| `"primary"` | `Enter` or left-click on the entry | `[En]` | **Primary action** — the main thing you want to do   |
+| `"shift"`   | `Shift-Enter` or `Shift-Click`     | `[Sh]` | Open related UI, show more details                   |
+| `"ctrl"`    | `Ctrl-Enter` or `Ctrl-Click`       | `[Ct]` | Alternative action or power move                     |
+| `"alt"`     | `Alt-Enter` or `Alt-Click`         | `[Al]` | Rare/special action                                  |
+| `nil`       | Context menu only                  | —      | Action without keyboard shortcut (context-menu-only) |
+
+**Note:** Set `modifier = nil` if you want an action to appear **only in the context menu** without any keyboard shortcut. This is useful for rarely-used or potentially destructive actions.
+
+#### Single-action entries (most common)
+
+For simple entries with only one action, set `modifier = "primary"`:
+
+```lua
+{
+    name       = "Alchemy",
+    icon       = "Interface/ICONS/trade_alchemy",
+    type       = "spell",
+    context_actions = {
+        {
+            name     = "Open",
+            func     = function() CastSpellByName("Alchemy") end,
+            modifier = "primary",  -- triggered by Enter / left-click
+        },
+    },
+}
+```
+
+**User interaction:**
+
+- Press `Enter` or left-click → opens the Alchemy window
+
+#### Multi-action entries
+
+You can define multiple actions with different modifiers. The primary action is **always the first one** with `modifier = "primary"`:
+
+```lua
+{
+    name       = "Engineering",
+    icon       = "Interface/ICONS/trade_engineering",
+    type       = "spell",
+    context_actions = {
+        {
+            name     = "Open",
+            func     = function() CastSpellByName("Engineering") end,
+            modifier = "primary",  -- primary action
+        },
+        {
+            name     = "Show Details",
+            func     = function() print("Engineering: Create gadgets and explosives") end,
+            modifier = "shift",
+        },
+        {
+            name     = "Link Profession",
+            func     = function() ChatFrame1:AddMessage("[Engineering]") end,
+            modifier = "ctrl",
+        },
+    },
+}
+```
+
+**User interaction:**
+
+- Press `Enter` or left-click → opens Engineering window
+- Press `Shift-Enter` or `Shift-Click` → prints profession details
+- Press `Ctrl-Enter` or `Ctrl-Click` → links profession in chat
+- Right-click → opens a context menu with all three actions listed (showing hints `[En]`, `[Sh]`, `[Ct]`)
+
+#### Real-world example: The Inventory module
+
+The [Inventory Provider](Providers/Inventory/Inventory.lua) demonstrates a practical multi-action setup:
+
+```lua
+context_actions = {
+    {
+        name     = L["Show in Bags"],    -- primary: open bags and highlight
+        func     = function() showInBags(entry) end,
+        modifier = "primary",
+    },
+    {
+        name     = L["Use / Equip"],     -- ctrl+enter: use item directly
+        func     = function() /* use item logic */ end,
+        modifier = "ctrl",
+    },
+    {
+        name     = L["Link in Chat"],    -- shift+enter: insert link to chat
+        func     = linkInChat,
+        modifier = "shift",
+    },
+}
+```
+
+The context menu shows all actions in order, with `Show in Bags [En]` at the top (the default when you press Enter).
+
+#### Context-menu-only actions
+
+Some actions should only be available via the context menu, without a keyboard shortcut (e.g., rarely-used or destructive actions). To create such an action, set `modifier = nil`:
+
+```lua
+context_actions = {
+    {
+        name     = "Equip Set",
+        func     = function() ItemRack.EquipSet(setName) end,
+        modifier = "primary",  -- primary action
+    },
+    {
+        name     = "Delete Set",
+        func     = function() ItemRack.DeleteSet(setName) end,
+        modifier = nil,  -- context menu only, no keyboard shortcut
+    },
+}
+```
+
+In this example, "Delete Set" appears in the context menu but cannot be triggered accidentally via a keyboard shortcut.
+
+#### Built-in hint customization
+
+The UI automatically adds modifier hints (`[En]`, `[Sh]`, `[Ct]`, `[Al]`) based on your `context_actions` definitions. You can override which action name is linked to a modifier in the **Brannfred Settings** under the **Key bindings** section for each provider.
 
 ### Dynamic providers
 

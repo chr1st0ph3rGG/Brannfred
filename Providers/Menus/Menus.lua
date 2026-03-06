@@ -77,11 +77,6 @@ local MENU_DEFINITIONS = {
         end,
     },
     {
-        name   = L["Combat Log"],
-        icon   = "Interface/ICONS/racial_troll_berserk",
-        action = function() ToggleCombatLog() end,
-    },
-    {
         name   = L["Help"],
         icon   = "Interface/ICONS/inv_misc_questionmark",
         action = function() ToggleHelpFrame() end,
@@ -103,12 +98,18 @@ function MenusProvider:OnEnable()
     self.entries = {}
     for _, def in ipairs(MENU_DEFINITIONS) do
         self.entries[#self.entries + 1] = {
-            name       = def.name,
-            icon       = type(def.icon) == "function" and def.icon() or def.icon,
-            type       = "menu",
-            color      = self.color,
-            labelColor = self.labelColor,
-            onActivate = def.action,
+            name            = def.name,
+            icon            = type(def.icon) == "function" and def.icon() or def.icon,
+            type            = "menu",
+            color           = self.color,
+            labelColor      = self.labelColor,
+            context_actions = {
+                {
+                    name     = L["Open"],
+                    func     = def.action,
+                    modifier = "primary",
+                },
+            },
         }
     end
 end

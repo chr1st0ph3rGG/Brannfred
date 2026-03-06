@@ -2,60 +2,70 @@ local L = LibStub("AceLocale-3.0"):NewLocale("Brannfred", "enUS", true)
 if not L then return end
 
 -- Binding
-L["Toggle Brannfred search"] = true
+L["Toggle Brannfred search"]                              = true
 
 -- Search frame
-L["Search..."]               = true
+L["Search..."]                                            = true
 
 -- Options: groups
-L["Appearance"]              = true
-L["Position"]                = true
-L["Key binding"]             = true
+L["Appearance"]                                           = true
+L["Position"]                                             = true
+L["Key binding"]                                          = true
 
 -- Options: key binding
-L["Set key binding"]              = true
-L["Click to assign a keyboard shortcut"] = true
-L["No key bound"]                 = true
-L["Press a key to bind..."]       = true
-L["ESC to cancel, DEL to clear"]  = true
-L["Current"]                      = true
+L["Set key binding"]                                      = true
+L["Click to assign a keyboard shortcut"]                  = true
+L["No key bound"]                                         = true
+L["Press a key to bind..."]                               = true
+L["ESC to cancel, DEL to clear"]                          = true
+L["Current"]                                              = true
 
 -- Options: appearance
-L["Width"]                   = true
-L["Width of the search frame"] = true
-L["Visible rows"]            = true
-L["Number of visible result rows"] = true
-L["Font"]                    = true
-L["Font size"]               = true
-L["Background color"]        = true
-L["Border color"]            = true
-L["Border texture"]          = true
-L["Border size"]             = true
-L["Content padding"]         = true
-L["Inner spacing between border and content"] = true
+L["Width"]                                                = true
+L["Width of the search frame"]                            = true
+L["Visible rows"]                                         = true
+L["Number of visible result rows"]                        = true
+L["Font"]                                                 = true
+L["Font size"]                                            = true
+L["Background color"]                                     = true
+L["Border color"]                                         = true
+L["Border texture"]                                       = true
+L["Border size"]                                          = true
+L["Content padding"]                                      = true
+L["Inner spacing between border and content"]             = true
 
 -- Options: position
-L["Anchor"]                  = true
-L["X Offset"]                = true
-L["Y Offset"]                = true
+L["Anchor"]                                               = true
+L["X Offset"]                                             = true
+L["Y Offset"]                                             = true
 
 -- Options: minimap
-L["Minimap button"]              = true
-L["Left-click to toggle search"] = true
-L["Right-click for settings"]    = true
+L["Minimap button"]                                       = true
+L["Left-click to toggle search"]                          = true
+L["Right-click for settings"]                             = true
 
 -- Options: search providers
-L["Search providers"]                                    = true
-L["Show in global search"]                               = true
+L["Search providers"]                                     = true
+L["Show in global search"]                                = true
 L["Providers shown when searching without a type prefix"] = true
 
 -- Options: Masque
-L["Icon skins (Masque)"]                          = true
-L["Apply Masque button skins to result icons"]    = true
-L["Requires the Masque addon to be installed"]    = true
+L["Icon skins (Masque)"]                                  = true
+L["Apply Masque button skins to result icons"]            = true
+L["Requires the Masque addon to be installed"]            = true
 
 -- Profiles
-L["Profiles"]                = true
+L["Profiles"]                                             = true
 
 -- Config provider
-L["Settings"]                = true
+L["Settings"]                                             = true
+L["Open Settings"]                                        = true
+
+-- Modifier key binding options / context menu
+L["Modifier key shortcuts"]                               = true
+L["Left-click / Enter"]                                   = true
+L["Shift"]                                                = true
+L["Ctrl"]                                                 = true
+L["Alt"]                                                  = true
+L["None"]                                                 = true
+L["Open"]                                                 = true

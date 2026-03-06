@@ -108,32 +108,36 @@ local function makeEntry(itemID, name)
         return select(2, C.Item.GetItemInfo(itemID))
     end
 
-    -- Shift+Enter: insert item link into the active chat editbox
-    entry.onShiftActivate = function()
-        local link = getLink()
-        if not link then
-            C.Item.GetItemInfo(itemID)
-            return
-        end
-        C.Timer.After(0, function()
-            local chatEdit = ChatEdit_GetActiveWindow()
-            if not (chatEdit and chatEdit:IsVisible()) then
-                ChatEdit_ActivateChat(DEFAULT_CHAT_FRAME.editBox)
-                chatEdit = DEFAULT_CHAT_FRAME.editBox
-            end
-            chatEdit:Insert(link)
-        end)
-    end
-
-    -- Ctrl+Enter: open Dressing Room for equippable items
-    entry.onCtrlActivate = function()
-        local link = getLink()
-        if not link then return end
-        local equipLoc = select(9, C.Item.GetItemInfo(itemID))
-        if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
-            DressUpItemLink(link)
-        end
-    end
+    entry.context_actions = {
+        {
+            name     = L["Link in Chat"],
+            func     = function()
+                local link = getLink()
+                if not link then C.Item.GetItemInfo(itemID) return end
+                C.Timer.After(0, function()
+                    local chatEdit = ChatEdit_GetActiveWindow()
+                    if not (chatEdit and chatEdit:IsVisible()) then
+                        ChatEdit_ActivateChat(DEFAULT_CHAT_FRAME.editBox)
+                        chatEdit = DEFAULT_CHAT_FRAME.editBox
+                    end
+                    chatEdit:Insert(link)
+                end)
+            end,
+            modifier = "shift",
+        },
+        {
+            name     = L["Open Dressing Room"],
+            func     = function()
+                local link = getLink()
+                if not link then return end
+                local equipLoc = select(9, C.Item.GetItemInfo(itemID))
+                if equipLoc and equipLoc ~= "" and equipLoc ~= "INVTYPE_NON_EQUIP" then
+                    DressUpItemLink(link)
+                end
+            end,
+            modifier = "ctrl",
+        },
+    }
 
     -- Icon hover: show item tooltip
     entry.onIconTooltip = function(anchor)
@@ -215,7 +219,7 @@ function ItemDBProvider:OnEnable()
 end
 
 -- ── Options ───────────────────────────────────────────────────────────────────
-Brannfred:RegisterProviderOptions("ItemDB", L["Item Database"], {
+local itemDBArgs = {
     status = {
         type     = "description",
         name     = function()
@@ -229,6 +233,12 @@ Brannfred:RegisterProviderOptions("ItemDB", L["Item Database"], {
         order    = 1,
         fontSize = "medium",
     },
-})
+}
+for k, v in pairs(Brannfred.GetModifierBindingArgs("itemdb", {
+    L["Link in Chat"], L["Open Dressing Room"],
+}, { primary = L["Link in Chat"], shift = L["Link in Chat"], ctrl = L["Open Dressing Room"] })) do
+    itemDBArgs[k] = v
+end
+Brannfred:RegisterProviderOptions("ItemDB", L["Item Database"], itemDBArgs)
 
 Brannfred:RegisterProvider(ItemDBProvider)

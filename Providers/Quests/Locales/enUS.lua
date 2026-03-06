@@ -8,3 +8,7 @@ L["objectives"]           = true
 L["TomTom not found"]     = true
 L["No coordinates found"] = true
 L["Completed"]            = true
+L["Open in Quest Log"]    = true
+L["Link in Chat"]         = true
+L["Show on Map"]          = true
+L["TomTom Waypoint"]      = true

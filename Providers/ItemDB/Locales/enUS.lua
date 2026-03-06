@@ -5,4 +5,6 @@ L["Item Database"]      = true
 L["Source"]             = true
 L["items"]              = true
 L["Loading item data…"] = true
-L["Ludwig not found"]   = true
+L["Ludwig not found"]    = true
+L["Link in Chat"]        = true
+L["Open Dressing Room"]  = true

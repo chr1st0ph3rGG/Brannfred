@@ -9,7 +9,7 @@ local L                 = LibStub("AceLocale-3.0"):GetLocale("Brannfred_Quests")
 local C                 = LibStub("C_Everywhere")
 
 local ICON_ACTIVE       = "Interface/AddOns/Questie/Icons/incomplete" -- gray ?
-local ICON_COMPLETE     = "Interface/AddOns/Questie/Icons/complete" -- yellow ?
+local ICON_COMPLETE     = "Interface/AddOns/Questie/Icons/complete"   -- yellow ?
 
 local ICON_COLOR_FAILED = { r = 1, g = 0.2, b = 0.2 }
 local LABEL_COLOR       = { r = 0.4, g = 0.8, b = 0.4 }
@@ -242,10 +242,28 @@ function QuestsProvider:OnEnable()
             entry.getMeta                   = function() return lvl > 0 and ("L" .. lvl) or "" end
             entry.getStats                  = function() return cachedStats end
             entry.getDesc                   = function() return cachedDesc end
-            entry.onActivate                = function() openQuestInLog(questID) end
-            entry.onShiftActivate           = function() linkQuestInChat(questID, title, lvl) end
-            entry.onCtrlActivate            = function() showQuestOnMap(questID) end
-            entry.onAltActivate             = function() setTomTomWaypoint(questID, title) end
+            entry.context_actions           = {
+                {
+                    name     = L["Open in Quest Log"],
+                    func     = function() openQuestInLog(questID) end,
+                    modifier = "primary",
+                },
+                {
+                    name     = L["Link in Chat"],
+                    func     = function() linkQuestInChat(questID, title, lvl) end,
+                    modifier = "shift",
+                },
+                {
+                    name     = L["Show on Map"],
+                    func     = function() showQuestOnMap(questID) end,
+                    modifier = "ctrl",
+                },
+                {
+                    name     = L["TomTom Waypoint"],
+                    func     = function() setTomTomWaypoint(questID, title) end,
+                    modifier = "alt",
+                },
+            }
 
             self.entries[#self.entries + 1] = entry
         end
@@ -255,6 +273,15 @@ function QuestsProvider:OnEnable()
         C.QuestLog.SelectQuestLogEntry(savedSel)
     end
 end
+
+-- ── Options ───────────────────────────────────────────────────────────────────
+local questArgs = {}
+for k, v in pairs(Brannfred.GetModifierBindingArgs("quest", {
+    L["Open in Quest Log"], L["Link in Chat"], L["Show on Map"], L["TomTom Waypoint"],
+}, { primary = L["Open in Quest Log"], shift = L["Link in Chat"], ctrl = L["Show on Map"], alt = L["TomTom Waypoint"] })) do
+    questArgs[k] = v
+end
+Brannfred:RegisterProviderOptions("Quests", L["Quests"], questArgs)
 
 -- ── Registration ───────────────────────────────────────────────────────────────
 Brannfred:RegisterProvider(QuestsProvider)

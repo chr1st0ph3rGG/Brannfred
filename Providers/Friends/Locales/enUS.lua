@@ -5,4 +5,6 @@ L["Friends"]   = true
 L["Battle.net"] = true
 L["In-Game"]   = true
 L["Offline"]  = true
-L["Online"]   = true
+L["Online"]          = true
+L["Whisper"]         = true
+L["Invite to Party"] = true

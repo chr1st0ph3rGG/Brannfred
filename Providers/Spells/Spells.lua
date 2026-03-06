@@ -49,8 +49,8 @@ local PROFESSION_ANCHOR_IDS = {
     [18248] = true,
 }
 
-local C          = LibStub("C_Everywhere")
-local POWER_NAMES = { [0] = "Mana", [1] = "Rage", [2] = "Focus", [3] = "Energy" }
+local C                     = LibStub("C_Everywhere")
+local POWER_NAMES           = { [0] = "Mana", [1] = "Rage", [2] = "Focus", [3] = "Energy" }
 
 local function buildStats(spellID)
     local info = C.Spell.GetSpellInfo(spellID) or {}
@@ -102,6 +102,41 @@ local SpellsProvider = {
     entries      = {},
 }
 
+local function buildContextActions(entry)
+    local actions = {
+        {
+            name     = L["Link in Chat"],
+            func     = function()
+                local link = C.Spell.GetSpellLink and C.Spell.GetSpellLink(entry._spellID)
+                if not link then return end
+                C.Timer.After(0, function()
+                    local chatEdit = ChatEdit_GetActiveWindow()
+                    if not (chatEdit and chatEdit:IsVisible()) then
+                        ChatEdit_ActivateChat(DEFAULT_CHAT_FRAME.editBox)
+                        chatEdit = DEFAULT_CHAT_FRAME.editBox
+                    end
+                    chatEdit:Insert(link)
+                end)
+            end,
+            modifier = "shift",
+        },
+    }
+
+    if entry._castable then
+        table.insert(actions, 1, {
+            name     = L["Open profession"],
+            func     = function()
+                if not InCombatLockdown() then
+                    CastSpellByName(entry._baseName)
+                end
+            end,
+            modifier = "primary",
+        })
+    end
+
+    entry.context_actions = actions
+end
+
 function SpellsProvider:OnEnable()
     self.entries       = {}
     local showAllRanks = Brannfred.db and Brannfred.db.profile.showAllRanks
@@ -110,16 +145,6 @@ function SpellsProvider:OnEnable()
 
     for tab = 1, numTabs do
         local _, _, offset, numEntries = C.SpellBook.GetSpellTabInfo(tab)
-
-        -- Check if this tab is a profession tab
-        local isProfTab = false
-        for slot = offset + 1, offset + numEntries do
-            local _, spellID = C.SpellBook.GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
-            if PROFESSION_ANCHOR_IDS[spellID] then
-                isProfTab = true
-                break
-            end
-        end
 
         for slot = offset + 1, offset + numEntries do
             local spellType, spellID = C.SpellBook.GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
@@ -143,17 +168,13 @@ function SpellsProvider:OnEnable()
                             _rank      = rankStr,
                             _slot      = slot,
                             _spellID   = spellID,
-                            _castable  = isProfTab,
+                            _castable  = not not PROFESSION_ANCHOR_IDS[spellID],
                         }
                         -- Closures reference the entry table so rank upgrades are reflected
                         entry.getMeta = function()
                             return entry._rank or ""
                         end
-                        entry.onActivate = function()
-                            if entry._castable and not InCombatLockdown() then
-                                CastSpellByName(entry._baseName)
-                            end
-                        end
+                        buildContextActions(entry)
                         entry.onDrag = function()
                             C.SpellBook.PickupSpellBookItem(entry._slot, BOOKTYPE_SPELL)
                         end
@@ -180,7 +201,8 @@ function SpellsProvider:OnEnable()
                         existing.icon       = icon
                         existing._slot      = slot
                         existing._spellID   = spellID
-                        if isProfTab then existing._castable = true end
+                        if PROFESSION_ANCHOR_IDS[spellID] then existing._castable = true end
+                        buildContextActions(existing)
                     end
                 end
             end

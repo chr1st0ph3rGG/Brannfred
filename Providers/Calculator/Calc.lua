@@ -180,17 +180,23 @@ function CalcProvider:onQuery(query)
     local resultStr = result and formatNumber(result)
 
     self.entries[1] = {
-        name       = resultStr or query,
-        icon       = "Interface/Icons/inv_misc_punchcards_yellow",
-        type       = "calc",
-        color      = resultStr and self.color or { r = 0.5, g = 0.5, b = 0.5 },
-        labelColor = self.labelColor,
-        _noPreview = not resultStr,
-        getStats   = resultStr and function() return query .. "  =  " .. resultStr end or nil,
-        onActivate = resultStr and function()
-            DEFAULT_CHAT_FRAME:AddMessage(
-                "|cffffcc00[Brannfred]|r  " .. query .. "  =  " .. resultStr)
-        end or nil,
+        name            = resultStr or query,
+        icon            = "Interface/Icons/inv_misc_punchcards_yellow",
+        type            = "calc",
+        color           = resultStr and self.color or { r = 0.5, g = 0.5, b = 0.5 },
+        labelColor      = self.labelColor,
+        _noPreview      = not resultStr,
+        getStats        = resultStr and function() return query .. "  =  " .. resultStr end or nil,
+        context_actions = resultStr and {
+            {
+                name     = L["Result"],
+                func     = function()
+                    DEFAULT_CHAT_FRAME:AddMessage(
+                        "|cffffcc00[Brannfred]|r  " .. query .. "  =  " .. resultStr)
+                end,
+                modifier = "primary",
+            },
+        } or nil,
     }
 end
 
