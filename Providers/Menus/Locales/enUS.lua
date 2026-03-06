@@ -14,3 +14,4 @@ L["Guild & Community"]     = true
 L["Inventory"]             = true
 L["Combat Log"]            = true
 L["Help"]                  = true
+L["Open"]                  = true

@@ -27,6 +27,12 @@ local function getClassIcon(localizedClass)
     return classIconMap[localizedClass] or "Interface/ICONS/INV_Misc_GroupLooking"
 end
 
+local function safeNumber(value)
+    if type(value) == "number" then return value end
+    if type(value) == "string" and value ~= "" then return tonumber(value) end
+    return nil
+end
+
 local function openWhisper(target)
     C.Timer.After(0, function()
         local chatEdit = ChatEdit_GetActiveWindow()
@@ -76,9 +82,10 @@ local function rebuildBNet()
         ---@diagnostic disable-next-line: undefined-global
         local presenceID, givenName, battleTag, _, toonName, _, isOnline, isAFK, isDND, noteText = BNGetFriendInfo(i)
         if presenceID then
-            local online   = isOnline and true or false
+            local online   = isOnline == true
             local friendId = (battleTag and battleTag ~= "") and battleTag
                 or (givenName or "?")
+            local safeNote = (type(noteText) == "string" and noteText ~= "") and noteText or ""
 
             local charName, charClass, charZone, charLevel
             if online then
@@ -91,7 +98,7 @@ local function rebuildBNet()
                         charName  = characterName
                         charClass = className
                         charZone  = zoneName
-                        charLevel = tonumber(level)
+                        charLevel = safeNumber(level)
                         break
                     end
                 end
@@ -120,9 +127,9 @@ local function rebuildBNet()
                 _zone      = charZone or "",
                 _friendId  = friendId,
                 _charName  = charName or "",
-                _note      = (noteText and noteText ~= "") and noteText or "",
-                _isAFK     = isAFK,
-                _isDND     = isDND,
+                _note      = safeNote,
+                _isAFK     = isAFK == true,
+                _isDND     = isDND == true,
             }
 
             entry.getMeta                 = function()
@@ -166,11 +173,42 @@ end
 local function rebuildIngame()
     ingameEntries = {}
 
-    local num = C.FriendList.GetNumFriends()
+    local num = 0
+    if C and C.FriendList and type(C.FriendList.GetNumFriends) == "function" then
+        num = safeNumber(C.FriendList.GetNumFriends()) or 0
+    elseif C_FriendList and type(C_FriendList.GetNumFriends) == "function" then
+        num = safeNumber(C_FriendList.GetNumFriends()) or 0
+        ---@diagnostic disable-next-line: undefined-global
+    elseif type(GetNumFriends) == "function" then
+        ---@diagnostic disable-next-line: undefined-global
+        num = safeNumber(GetNumFriends()) or 0
+    end
+
     for i = 1, num do
-        local info = C.FriendList.GetFriendInfoByIndex(i)
+        local info
+        if C and C.FriendList and type(C.FriendList.GetFriendInfoByIndex) == "function" then
+            info = C.FriendList.GetFriendInfoByIndex(i)
+        elseif C_FriendList and type(C_FriendList.GetFriendInfoByIndex) == "function" then
+            info = C_FriendList.GetFriendInfoByIndex(i)
+            ---@diagnostic disable-next-line: undefined-global
+        elseif type(GetFriendInfo) == "function" then
+            -- Legacy API returns multiple values instead of a table.
+            ---@diagnostic disable-next-line: undefined-global
+            local name, level, className, area, connected, status, notes = GetFriendInfo(i)
+            info = {
+                name = name,
+                level = level,
+                className = className,
+                area = area,
+                connected = connected,
+                notes = notes,
+                status = status,
+            }
+        end
+
         if info and info.name then
             local online                      = info.connected and true or false
+            local levelNum                    = safeNumber(info.level)
             local entry                       = {
                 name       = info.name,
                 icon       = getClassIcon(info.className or ""),
@@ -178,10 +216,10 @@ local function rebuildIngame()
                 color      = online and COLOR_ONLINE or COLOR_OFFLINE,
                 labelColor = LABEL_INGAME,
                 _online    = online,
-                _level     = (info.level and info.level > 0) and tostring(info.level) or "",
+                _level     = (levelNum and levelNum > 0) and tostring(levelNum) or "",
                 _class     = info.className or "",
                 _zone      = info.area or "",
-                _note      = (info.notes and info.notes ~= "") and info.notes or "",
+                _note      = (type(info.notes) == "string" and info.notes ~= "") and info.notes or "",
             }
 
             entry.getMeta                     = function()

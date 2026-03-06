@@ -56,6 +56,14 @@ local function getTypeLabel(entryType)
     return ""
 end
 
+-- Ensure UI text fields never receive booleans/tables from providers.
+local function asText(value)
+    local t = type(value)
+    if t == "string" then return value end
+    if t == "number" then return tostring(value) end
+    return ""
+end
+
 -- State
 local currentResults = {}
 local selectedIndex  = 1
@@ -507,13 +515,13 @@ openContextMenu = function(entry)
         end
     end
 
-    ctxHeader:SetText(entry.name)
+    ctxHeader:SetText(asText(entry.name))
 
     local count = math.min(#ctxActions, MAX_CTX_ROWS)
     for i = 1, MAX_CTX_ROWS do
         local action = ctxActions[i]
         if action then
-            ctxRows[i].text:SetText(action.name)
+            ctxRows[i].text:SetText(asText(action.name))
             ctxRows[i].hintText:SetText(hintMap[action.name] or "")
             ctxRows[i].selTex:Hide()
             ctxRows[i]:Show()
@@ -548,15 +556,15 @@ showDescription = function(entry)
     descIcon:SetTexture(entry.icon)
     local dic = entry.iconColor
     descIcon:SetVertexColor(dic and dic.r or 1, dic and dic.g or 1, dic and dic.b or 1)
-    descName:SetText(entry.name)
+    descName:SetText(asText(entry.name))
     local nc = entry.color
     descName:SetTextColor(nc and nc.r or 1, nc and nc.g or 0.82, nc and nc.b or 0, 1)
 
-    local statsStr = entry.getStats and entry.getStats() or ""
+    local statsStr = asText(entry.getStats and entry.getStats() or "")
     descStats:SetText(statsStr)
     descStats:SetShown(statsStr ~= "")
 
-    local desc = entry.getDesc and entry.getDesc() or ""
+    local desc = asText(entry.getDesc and entry.getDesc() or "")
     if desc ~= "" then
         descText:SetText(desc)
         local descH = descText:GetStringHeight()
@@ -623,13 +631,13 @@ local function updateResults(query)
         rows[i].icon:SetTexture(entry.icon)
         local ic = entry.iconColor
         rows[i].icon:SetVertexColor(ic and ic.r or 1, ic and ic.g or 1, ic and ic.b or 1)
-        rows[i].text:SetText(entry.name)
+        rows[i].text:SetText(asText(entry.name))
         rows[i].text:SetTextColor(c and c.r or 0.95, c and c.g or 0.95, c and c.b or 0.95, 1)
         rows[i].typeLabel:SetText(getTypeLabel(entry._originalType or entry.type))
         rows[i].typeLabel:SetWidth(rows[i].typeLabel:GetStringWidth() + 4)
         local lc = entry.labelColor
         rows[i].typeLabel:SetTextColor(lc and lc.r or 0.45, lc and lc.g or 0.45, lc and lc.b or 0.45, 1)
-        rows[i].metaLabel:SetText(entry.getMeta and entry.getMeta() or "")
+        rows[i].metaLabel:SetText(asText(entry.getMeta and entry.getMeta() or ""))
         rows[i]:Show()
     end
 
